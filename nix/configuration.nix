@@ -81,10 +81,27 @@ in
         user.email = "hello@gougoule.ch";
       };
     };
+
+    wayland.windowManager.hyprland = {
+      enable = true;
+      settings = {
+        "$mod" = "SUPER";
+        "$terminal" = "ghostty";
+        "$browser" = "xdg-open https://";
+        bind = [
+          "$mod, Return, exec, $terminal"
+        ];
+        input = {
+          kb_layout = "ch";
+          kb_variant = "fr";
+        };
+      };
+    };
   };
 
 
   programs.firefox.enable = true;
+  programs.hyprland.enable = true;
 
   nixpkgs.config.allowUnfree = true;
 
@@ -93,6 +110,8 @@ in
     git
     brave
     gh
+    ghostty
+    fastfetch
   ];
 
   system.stateVersion = "25.11"; # Did you read the comment?
