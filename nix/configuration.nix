@@ -64,8 +64,6 @@ in
         isNormalUser = true;
         description = "Nathan Gasser";
         extraGroups = [ "networkmanager" "wheel" ];
-        packages = with pkgs; [
-        ];
     };
 
     home-manager.users.nathangasser = { pkgs, ... }: {
@@ -89,14 +87,51 @@ in
                 "$browser" = "xdg-open https://";
                 bind = [
                     "$mod, Return, exec, $terminal"
-                        "$mod, d, exec, wofi --show drun"
-                ];
+                    "$mod, d, exec, wofi --show drun"
+                ]
+                ++ (
+                    builtins.concatLists (builtins.genList (i:
+                        let ws = i + 1;
+                            in [
+                                "$mod, code:1${toString i}, workspace, ${toString ws}"
+                                "$mod SHIFT, code:1${toString i}, movetoworkspace, ${toString ws}"
+                            ]
+                        )
+                    9)
+                  );
                 input = {
                     kb_layout = "ch";
                     kb_variant = "fr";
                 };
             };
         };
+
+        home.pointerCursor = {
+            gtk.enable = true;
+            package = pkgs.bibata-cursors;
+            name = "Bibata-Modern-Classic";
+            size = 16;
+        };
+
+        gtk = {
+            enable = true;
+
+theme = {
+    package = pkgs.gnome-themes-extra;
+    name = "Adwaita-dark";
+  };
+
+            iconTheme = {
+                package = pkgs.adwaita-icon-theme;
+                name = "Adwaita";
+            };
+
+            font = {
+                name = "Sans";
+                size = 11;
+            };
+        };
+
     };
 
 
