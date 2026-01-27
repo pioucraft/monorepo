@@ -82,6 +82,11 @@ in
         wayland.windowManager.hyprland = {
             enable = true;
             settings = {
+                decoration = {
+                    active_opacity = "0.95";
+                    inactive_opacity = "0.9";
+                };
+
                 misc = {
                     force_default_wallpaper = 0;
                     disable_hyprland_logo = true;
@@ -111,6 +116,12 @@ in
                     kb_variant = "fr";
                 };
             };
+            extraConfig = ''
+                animations {
+                    enabled = 0
+                }
+            '';
+
         };
 
         home.pointerCursor = {
