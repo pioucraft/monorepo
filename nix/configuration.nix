@@ -93,6 +93,8 @@ in
                 bind = [
                     "$mod, Return, exec, $terminal"
                     "$mod, Space, exec, wofi --show drun"
+                    "$mod, B, exec, $browser"
+                    "$mod, Q, killactive"
                 ]
                 ++ (
                     builtins.concatLists (builtins.genList (i:
