@@ -92,7 +92,7 @@ in
                 "$browser" = "xdg-open https://";
                 bind = [
                     "$mod, Return, exec, $terminal"
-                    "$mod, d, exec, wofi --show drun"
+                    "$mod, Space, exec, wofi --show drun"
                 ]
                 ++ (
                     builtins.concatLists (builtins.genList (i:
@@ -121,10 +121,10 @@ in
         gtk = {
             enable = true;
 
-theme = {
-    package = pkgs.gnome-themes-extra;
-    name = "Adwaita-dark";
-  };
+            theme = {
+                package = pkgs.gnome-themes-extra;
+                name = "Adwaita-dark";
+            };
 
             iconTheme = {
                 package = pkgs.adwaita-icon-theme;
