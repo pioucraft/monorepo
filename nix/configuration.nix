@@ -22,6 +22,8 @@ in
     boot.loader.efi.canTouchEfiVariables = true;
 
     networking.hostName = "nixos"; # Define your hostname.
+    services.resolved.enable = true;
+    networking.nameservers = ["1.1.1.1" "8.8.8.8"];
 
     # Enable networking
         networking.networkmanager.enable = true;

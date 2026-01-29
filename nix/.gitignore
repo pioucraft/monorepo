@@ -1,2 +1,3 @@
 hardware-configuration.nix
 temp.nix
+apple-silicon-support
