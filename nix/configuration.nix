@@ -102,6 +102,7 @@ in
                     "$mod, Space, exec, wofi --show drun"
                     "$mod, B, exec, $browser"
                     "$mod, Q, killactive"
+                    "$mod Control, l, exec, hyprlock"
                 ]
                 ++ (
                     builtins.concatLists (builtins.genList (i:
@@ -162,13 +163,14 @@ in
 
     environment.systemPackages = with pkgs; [
         vim
-            git
-            brave
-            gh
-            ghostty
-            fastfetch
-            pavucontrol
-            wofi
+        git
+        brave
+        gh
+        ghostty
+        fastfetch
+        pavucontrol
+        wofi
+        hyprlock
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
