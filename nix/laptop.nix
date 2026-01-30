@@ -18,5 +18,22 @@
     enable = true;
     settings.General.EnableNetworkConfiguration = true;
   };
+
+  home-manager.users.nathangasser = { pkgs, ... }: {
+    wayland.windowManager.hyprland = {
+      settings = {
+        monitor = [
+          "eDP-1,2256x1504@60,0x0,1.6"  # adjust name/resolution to your output
+        ];
+
+        input = {
+          touchpad = {
+            natural_scroll = true;
+            scroll_factor = 0.7;
+          };
+        };
+      };
+    };
+  };
 }
 
