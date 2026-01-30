@@ -26,7 +26,14 @@ in
     networking.nameservers = ["1.1.1.1" "8.8.8.8"];
 
     # Enable networking
-        networking.networkmanager.enable = true;
+    networking.networkmanager.enable = true;
+
+    networking.firewall = {
+        enable = true;
+        allowedTCPPorts = [ 53317 ];
+        allowedUDPPorts = [ 53317 ];
+    };
+
 
     time.timeZone = "Europe/Zurich";
 
@@ -84,6 +91,10 @@ in
         wayland.windowManager.hyprland = {
             enable = true;
             settings = {
+                exec-once = [
+                    "waybar &"
+                ];
+
                 decoration = {
                     active_opacity = "0.95";
                     inactive_opacity = "0.9";
@@ -178,6 +189,8 @@ in
         wofi
         hyprlock
         playerctl
+        waybar
+        localsend
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
