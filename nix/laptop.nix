@@ -29,7 +29,7 @@
         input = {
           touchpad = {
             natural_scroll = true;
-            scroll_factor = 0.7;
+            scroll_factor = 0.3;
           };
         };
       };
