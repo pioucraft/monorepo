@@ -17,5 +17,14 @@
         enable = true;
         enable32Bit = true;
     };
+
+    virtualisation.libvirtd.enable = true;
+
+    boot.kernelModules = [ "kvm-intel" "kvm" ];
+
+    programs.virt-manager.enable = true;
+
+    users.users.nathangasser.extraGroups = [ "libvirtd" "kvm" ];
+
 }
 
