@@ -135,9 +135,9 @@ in
 
             plugins.cmp = {
                 enable = true;  
-settings.sources = [
-    { name = "nvim_lsp"; }  # LSP completions first
-  ];
+                settings.sources = [
+                    { name = "nvim_lsp"; }  # LSP completions first
+                ];
 
 
                 settings.mapping = {
@@ -176,59 +176,59 @@ settings.sources = [
         programs.waybar = {
             enable = true;
             systemd.enable = true;  # Auto-starts with your Wayland session
-                settings = [
-{
-        layer = "top";
-        modules-left = [ "hyprland/workspaces" ];
-        modules-center = [ "clock" ];
-        modules-right = [ "pulseaudio" "cpu" "battery" "memory" ];
-        battery = {
-          format = "{capacity}% {icon}";
-          format-icons = [ "" "" "" "" "" ];
-        };
-        clock = {
-          format = " {:%a, %d. %b  %H:%M:%S} ";
-          interval = 1;
-        };
-        cpu = {
-          interval = 1;
-          format = "{icon0}{icon1}{icon2}{icon3}{icon4}{icon5}{icon6}{icon7}";
-          format-icons = [ "▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
-        };
-        memory = {
-          interval = 1;
-          format = "{used:0.1f}G/{total:0.1f}G";
-        };
-        pulseaudio = {
-          format = "{volume}% {icon}";
-          format-bluetooth = "{volume}% {icon}";
-          format-muted = "";
-          format-icons = {
-            "alsa_output.pci-0000_00_1f.3.analog-stereo" = "";
-            "alsa_output.pci-0000_00_1f.3.analog-stereo-muted" = "";
-            headphone = "";
-            "hands-free" = "";
-            headset = "";
-            phone = "";
-            "phone-muted" = "";
-            portable = "";
-            car = "";
-            default = [ "" "" ];
-          };
-          scroll-step = 1;
-          on-click = "pavucontrol";
-          ignored-sinks = [ "Easy Effects Sink" ];
-        };
-        "hyprland/workspaces" = {
-          format = "{name}: {icon}";
-          format-icons = {
-            active = "";
-            default = "";
-          };
-        };
-      }
-                ];
-style = ''
+            settings = [
+                {
+                    layer = "top";
+                    modules-left = [ "hyprland/workspaces" ];
+                    modules-center = [ "clock" ];
+                    modules-right = [ "pulseaudio" "cpu" "battery" "memory" ];
+                    battery = {
+                        format = "{capacity}% {icon}";
+                        format-icons = [ "" "" "" "" "" ];
+                    };
+                    clock = {
+                        format = " {:%a, %d. %b  %H:%M:%S} ";
+                        interval = 1;
+                    };
+                    cpu = {
+                        interval = 1;
+                        format = "{icon0}{icon1}{icon2}{icon3}{icon4}{icon5}{icon6}{icon7}";
+                        format-icons = [ "▁" "▂" "▃" "▄" "▅" "▆" "▇" "█" ];
+                    };
+                    memory = {
+                        interval = 1;
+                        format = "{used:0.1f}G/{total:0.1f}G";
+                    };
+                    pulseaudio = {
+                        format = "{volume}% {icon}";
+                        format-bluetooth = "{volume}% {icon}";
+                        format-muted = "";
+                        format-icons = {
+                            "alsa_output.pci-0000_00_1f.3.analog-stereo" = "";
+                            "alsa_output.pci-0000_00_1f.3.analog-stereo-muted" = "";
+                            headphone = "";
+                            "hands-free" = "";
+                            headset = "";
+                            phone = "";
+                            "phone-muted" = "";
+                            portable = "";
+                            car = "";
+                            default = [ "" "" ];
+                        };
+                        scroll-step = 1;
+                        on-click = "pavucontrol";
+                        ignored-sinks = [ "Easy Effects Sink" ];
+                    };
+                    "hyprland/workspaces" = {
+                        format = "{name}: {icon}";
+                        format-icons = {
+                            active = "";
+                            default = "";
+                        };
+                    };
+                }
+            ];
+            style = ''
       * {
         border: none;
         border-radius: 0;
@@ -270,7 +270,7 @@ style = ''
       #memory {
         margin-right: 10px;
       }
-    '';
+            '';
 
         };
 
