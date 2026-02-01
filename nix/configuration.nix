@@ -1,21 +1,30 @@
 { config, pkgs, ... }:
 
 let
-    home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
-in
+  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
+  nixvim = import (builtins.fetchGit {
+      url = "https://github.com/nix-community/nixvim";
+      ref = "nixos-25.11";
+  });
 
+in
 {
     imports =
         [ # Include the results of the hardware scan.
         ./hardware-configuration.nix
-            ./temp.nix
-            (import "${home-manager}/nixos")
+        ./temp.nix
+        (import "${home-manager}/nixos")
+        nixvim.nixosModules.nixvim
         ];
 
     nix.nixPath = [
         "nixos-config=/home/nathangasser/git/monorepo/nix/configuration.nix"  # Your desired default path
             "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
     ];
+
+    nixpkgs.config.allowUnfree = true;
+    programs.nixvim.enable = true;
+    home-manager.extraSpecialArgs = { inherit nixvim; };  # Passes nixvim to user configs
 
     # Bootloader.
     boot.loader.systemd-boot.enable = true;
@@ -76,9 +85,31 @@ in
     };
 
     home-manager.users.nathangasser = { pkgs, ... }: {
+        imports = [
+            nixvim.homeModules.nixvim
+        ];
+
         home.username = "nathangasser";
         home.homeDirectory = "/home/nathangasser";
         home.stateVersion = "25.11";
+        nixpkgs.config.allowUnfree = true;
+
+        programs.nixvim = {
+            enable = true;
+            nixpkgs.config.allowUnfree = true;
+
+            colorschemes.gruvbox.enable = true;
+            plugins.copilot-vim.enable = true;
+
+            opts = {
+                expandtab = true;
+                shiftwidth = 4;
+                tabstop = 4;
+                number = true;
+                relativenumber = true;
+            };
+
+        };
 
         programs.git = {
             enable = true;
@@ -279,8 +310,6 @@ style = ''
 
     programs.firefox.enable = true;
     programs.hyprland.enable = true;
-
-    nixpkgs.config.allowUnfree = true;
 
     environment.systemPackages = with pkgs; [
         vim
