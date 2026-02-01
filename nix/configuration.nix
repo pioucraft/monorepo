@@ -197,6 +197,10 @@ style = ''
                     inactive_opacity = "0.9";
                 };
 
+                exec-once = [
+                    "swaybg -i $HOME/git/monorepo/nix/wallpapers/$(ls $HOME/git/monorepo/nix/wallpapers | shuf -n 1)"
+                ];
+
                 misc = {
                     force_default_wallpaper = 0;
                     disable_hyprland_logo = true;
@@ -289,6 +293,7 @@ style = ''
         waybar
         localsend
         font-awesome_6
+        swaybg
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
