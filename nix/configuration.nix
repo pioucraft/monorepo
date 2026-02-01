@@ -109,6 +109,60 @@ in
                 relativenumber = true;
             };
 
+            plugins.treesitter = {
+                enable = true;
+                grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+                    nix
+                    c
+                ];
+                settings = {
+                    highlight.enable = true;
+                    indent.enable = true;
+                    # More: autotag.enable = true;
+                };
+            };
+
+            plugins.lsp = {
+                enable = true;
+                inlayHints = true;
+                servers = {
+                    nixd.enable = true;
+                    clangd.enable = true;
+                };
+            };
+
+            plugins.cmp-nvim-lsp.enable = true;
+
+            plugins.cmp = {
+                enable = true;  
+settings.sources = [
+    { name = "nvim_lsp"; }  # LSP completions first
+  ];
+
+
+                settings.mapping = {
+                    "<C-Space>" = "cmp.mapping.complete()";
+                    "<C-l>" = "cmp.mapping.confirm({ select = true })";
+                    "<C-j>" = ''
+    cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+      else
+        fallback()
+      end
+    end, { 'i', 's' })
+                    '';
+                    "<C-k>" = ''
+    cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select })
+      else
+        fallback()
+      end
+    end, { 'i', 's' })
+                    '';
+                };
+            };
         };
 
         programs.git = {
@@ -326,6 +380,9 @@ style = ''
         localsend
         font-awesome_6
         swaybg
+        clang-tools
+        gcc
+        nixd
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
