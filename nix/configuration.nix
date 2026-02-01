@@ -195,6 +195,9 @@ style = ''
                 decoration = {
                     active_opacity = "0.95";
                     inactive_opacity = "0.9";
+                    blur = {
+                        enabled = false;
+                    };
                 };
 
                 exec-once = [
