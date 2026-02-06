@@ -6,7 +6,7 @@
     boot.loader.grub.device = "/dev/sda";
 
     nix.nixPath = [
-        "nixos-config=/home/nix/git/monorepo/nix/configuration.nix"  # Your desired default path
+        "nixos-config=/home/nix/git/monorepo/nix-server/configuration.nix"  # Your desired default path
         "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos"
     ];
 
