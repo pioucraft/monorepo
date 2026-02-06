@@ -14,11 +14,6 @@
     fsType = "ext4";
   };
 
-  networking.wireless.iwd = {
-    enable = true;
-    settings.General.EnableNetworkConfiguration = true;
-  };
-
   home-manager.users.nathangasser = { pkgs, ... }: {
     wayland.windowManager.hyprland = {
       settings = {
