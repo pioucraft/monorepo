@@ -1,7 +1,11 @@
-export const auth = $state({
-	username: null as string | null,
-	password: null as string | null,
-	hashedPassword: null as string | null
+export const auth: {
+	username: string | null;
+	password: string | null;
+	hashedPassword: string | null;
+} = $state({
+	username: null,
+	password: null,
+	hashedPassword: null
 });
 
 export function setAuth(username: string, password: string, hashedPassword: string) {
