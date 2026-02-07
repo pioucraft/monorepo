@@ -74,17 +74,32 @@
 	}
 
 	function formatDate(timestamp: number): string {
-		return new Date(timestamp).toLocaleString();
+		const d = new Date(timestamp);
+		const day = d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+		const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+		return `${day} ${time}`;
+	}
+
+	function sameMinute(a: number, b: number): boolean {
+		const da = new Date(a);
+		const db = new Date(b);
+		return (
+			da.getFullYear() === db.getFullYear() &&
+			da.getMonth() === db.getMonth() &&
+			da.getDate() === db.getDate() &&
+			da.getHours() === db.getHours() &&
+			da.getMinutes() === db.getMinutes()
+		);
 	}
 
 	onMount(loadEntries);
 </script>
 
 <div class="min-h-screen bg-white p-8 dark:bg-black">
-	<div class="mx-auto max-w-lg space-y-6">
-		<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
+	<div class="mx-auto max-w-lg">
+		<h1 class="mb-6 text-xl font-bold text-black dark:text-white">Journal</h1>
 
-		<form onsubmit={(e) => { e.preventDefault(); addEntry(); }} class="space-y-2">
+		<form onsubmit={(e) => { e.preventDefault(); addEntry(); }} class="mb-8 space-y-2">
 			<textarea
 				bind:value={newEntry}
 				placeholder="Write something..."
@@ -104,12 +119,12 @@
 		{:else if entries.length === 0}
 			<p class="text-sm text-neutral-500">No entries yet.</p>
 		{:else}
-			<div class="space-y-4">
-				{#each entries as entry}
-					<div class="border border-black p-4 dark:border-white">
-						<p class="text-xs text-neutral-500">{formatDate(entry.date)}</p>
-						<p class="mt-1 text-sm text-black dark:text-white">{entry.content}</p>
-					</div>
+			<div>
+				{#each entries as entry, i}
+					{#if i === 0 || !sameMinute(entry.date, entries[i - 1].date)}
+						<p class="mb-1 {i > 0 ? 'mt-4' : ''} text-xs text-neutral-500">{formatDate(entry.date)}</p>
+					{/if}
+					<p class="mb-1 text-sm text-black dark:text-white">&gt; {entry.content}</p>
 				{/each}
 			</div>
 		{/if}
