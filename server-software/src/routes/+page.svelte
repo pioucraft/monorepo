@@ -45,8 +45,8 @@
 		loading = false;
 	}
 
-	async function saveEntries() {
-		const json = JSON.stringify(entries);
+	async function saveEntries(newEntries: JournalEntry[] = entries) {
+		const json = JSON.stringify(newEntries);
 		const encrypted = await encrypt(auth.password!, json);
 
 		const res = await fetch('/api/journal', {
@@ -60,17 +60,19 @@
 
 		if (!res.ok) {
 			toast('Failed to save journal', false);
-		}
+		} else {
+            toast('Journal saved', true);
+        }
 	}
 
 	async function addEntry() {
 		if (!newEntry.trim()) return;
 
-		entries = [{ content: newEntry.trim(), date: Date.now() }, ...entries];
+		let newEntries = [{ content: newEntry.trim(), date: Date.now() }, ...entries];
 		newEntry = '';
 
-		await saveEntries();
-		toast('Entry added', true);
+		await saveEntries(newEntries);
+        await loadEntries();
 	}
 
 	function formatDate(timestamp: number): string {
