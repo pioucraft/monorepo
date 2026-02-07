@@ -6,6 +6,7 @@ let
       url = "https://github.com/nix-community/nixvim";
       ref = "nixos-25.11";
   });
+  server-software = import ../server-software { inherit pkgs; };
 
 in
 {
@@ -136,6 +137,32 @@ in
         git
         fastfetch
     ];
+
+    # Journal app
+    systemd.services.server-software = {
+        description = "Journal Server";
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+            ExecStart = "${server-software}/bin/server-software";
+            WorkingDirectory = "/home/nix/git/monorepo/server-software";
+            EnvironmentFile = "/home/nix/git/monorepo/server-software/.env";
+            Restart = "always";
+            User = "nix";
+        };
+    };
+
+    # Caddy reverse proxy
+    services.caddy = {
+        enable = true;
+        virtualHosts."home.gougoule.ch" = {
+            extraConfig = ''
+                reverse_proxy localhost:3000
+            '';
+        };
+    };
+
+    networking.firewall.allowedTCPPorts = [ 80 443 22 ];
 
     system.stateVersion = "25.05";
 }
