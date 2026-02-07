@@ -114,6 +114,7 @@ in
                 grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
                     nix
                     c
+                    svelte
                 ];
                 settings = {
                     highlight.enable = true;
@@ -128,6 +129,7 @@ in
                 servers = {
                     nixd.enable = true;
                     clangd.enable = true;
+                    svelte.enable = true;
                 };
             };
 
@@ -383,6 +385,7 @@ in
         clang-tools
         gcc
         nixd
+        bun
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
