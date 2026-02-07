@@ -23,7 +23,7 @@
 
 		<button
 			type="submit"
-			class="w-full bg-black py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+			class="w-full cursor-pointer bg-black py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
 		>
 			Login
 		</button>
