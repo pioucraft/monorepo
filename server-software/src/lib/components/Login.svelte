@@ -28,7 +28,7 @@
 		if (res.ok) {
 			setAuth(username, password, hashed);
 			toast('Login successful', true);
-			setTimeout(() => goto('/'), 1000);
+			goto('/');
 		} else {
 			toast('Invalid credentials', false);
 		}
