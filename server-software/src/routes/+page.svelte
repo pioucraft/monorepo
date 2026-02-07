@@ -121,6 +121,9 @@
 		{:else}
 			<div>
 				{#each entries as entry, i}
+					{#if i > 0 && Math.abs(entry.date - entries[i - 1].date) > 5 * 60 * 1000}
+						<hr class="my-4 border-neutral-300 dark:border-neutral-700" />
+					{/if}
 					{#if i === 0 || !sameMinute(entry.date, entries[i - 1].date)}
 						<p class="mb-1 {i > 0 ? 'mt-4' : ''} text-xs text-neutral-500">{formatDate(entry.date)}</p>
 					{/if}
