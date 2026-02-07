@@ -14,6 +14,11 @@
 	let loading = $state(true);
 
 	async function loadEntries() {
+		if (!auth.hashedPassword) {
+			loading = false;
+			return;
+		}
+
 		const res = await fetch('/api/journal', {
 			headers: { Authorization: auth.hashedPassword! }
 		});
