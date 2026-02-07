@@ -130,6 +130,7 @@ in
                     nixd.enable = true;
                     clangd.enable = true;
                     svelte.enable = true;
+                    tailwindcss.enable = true;
                 };
             };
 
