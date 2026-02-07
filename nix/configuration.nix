@@ -387,6 +387,7 @@ in
         gcc
         nixd
         bun
+        opencode
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
