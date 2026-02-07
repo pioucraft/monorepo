@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { toast } from '$lib/toast.svelte';
+	import { setAuth } from '$lib/auth.svelte';
 
 	let username = $state('');
 	let password = $state('');
@@ -25,6 +26,7 @@
 		});
 
 		if (res.ok) {
+			setAuth(username, password, hashed);
 			toast('Login successful', true);
 			setTimeout(() => goto('/'), 1000);
 		} else {
