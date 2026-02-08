@@ -3,6 +3,9 @@
 	import { encrypt, decrypt } from '$lib/crypto.client';
 	import { toast } from '$lib/toast.svelte';
 	import { onMount } from 'svelte';
+	import PencilSquare from '$lib/icons/PencilSquare.svelte';
+	import Clock from '$lib/icons/Clock.svelte';
+	import XMark from '$lib/icons/XMark.svelte';
 
 	interface Revision {
 		content: string;
@@ -191,20 +194,22 @@
 							</div>
 						</div>
 					{:else}
-						<div class="group mb-1 flex items-start gap-2">
+						<div class="mb-1 flex items-start gap-2">
 							<p class="text-sm text-black dark:text-white">&gt; {rev.content}</p>
 							<button
 								onclick={() => startEditing(i)}
-								class="shrink-0 cursor-pointer text-xs text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100"
+								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
+								aria-label="Modify entry"
 							>
-								modify
+								<PencilSquare class="h-3.5 w-3.5" />
 							</button>
 							{#if entry.length > 1}
 								<button
 									onclick={() => historyIndex = i}
-									class="shrink-0 cursor-pointer text-xs text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100"
+									class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
+									aria-label="View history"
 								>
-									history
+									<Clock class="h-3.5 w-3.5" />
 								</button>
 							{/if}
 						</div>
@@ -232,9 +237,10 @@
 				<h2 class="text-sm font-bold text-black dark:text-white">Revision history</h2>
 				<button
 					onclick={() => historyIndex = null}
-					class="cursor-pointer text-xs text-neutral-400 hover:text-black dark:hover:text-white"
+					class="cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
+					aria-label="Close"
 				>
-					close
+					<XMark />
 				</button>
 			</div>
 			{#each [...entries[historyIndex]].reverse() as rev, i}
