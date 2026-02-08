@@ -26,5 +26,10 @@
 
     users.users.nathangasser.extraGroups = [ "libvirtd" "kvm" ];
 
+
+    environment.systemPackages = with pkgs; [
+        steam
+    ];
+
 }
 
