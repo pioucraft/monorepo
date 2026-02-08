@@ -1,23 +1,13 @@
 <script lang="ts">
-	import { auth } from '$lib/auth.svelte';
-	import { encrypt, decrypt } from '$lib/crypto.client';
-	import { toast } from '$lib/toast.svelte';
+	import { journal, latest, loadEntries, saveEntries, type JournalEntry, type Revision } from '$lib/journal.svelte';
 	import { onMount } from 'svelte';
 	import PencilSquare from '$lib/icons/PencilSquare.svelte';
 	import Clock from '$lib/icons/Clock.svelte';
 	import XMark from '$lib/icons/XMark.svelte';
 	import MagnifyingGlass from '$lib/icons/MagnifyingGlass.svelte';
+	import ChartBar from '$lib/icons/ChartBar.svelte';
 
-	interface Revision {
-		content: string;
-		date: number;
-	}
-
-	type JournalEntry = Revision[];
-
-	let entries: JournalEntry[] = $state([]);
 	let newEntry = $state('');
-	let loading = $state(true);
 	let editingIndex: number | null = $state(null);
 	let editingContent = $state('');
 	let historyIndex: number | null = $state(null);
@@ -25,76 +15,20 @@
 
 	let filteredEntries: { entry: JournalEntry; originalIndex: number }[] = $derived(
 		search.trim()
-			? entries
+			? journal.entries
 				.map((entry, i) => ({ entry, originalIndex: i }))
 				.filter(({ entry }) => {
 					const content = latest(entry).content.toLowerCase();
 					return search.trim().toLowerCase().split(/\s+/).every((word) => content.includes(word));
 				})
-			: entries.map((entry, i) => ({ entry, originalIndex: i }))
+			: journal.entries.map((entry, i) => ({ entry, originalIndex: i }))
 	);
-
-	function latest(entry: JournalEntry): Revision {
-		return entry[entry.length - 1];
-	}
-
-	async function loadEntries() {
-		if (!auth.hashedPassword) {
-			loading = false;
-			return;
-		}
-
-		const res = await fetch('/api/journal', {
-			headers: { Authorization: auth.hashedPassword! }
-		});
-
-		if (!res.ok) {
-			toast('Failed to load journal', false);
-			loading = false;
-			return;
-		}
-
-		const raw = await res.text();
-		if (!raw) {
-			entries = [];
-			loading = false;
-			return;
-		}
-
-		try {
-			const decrypted = await decrypt(auth.password!, raw);
-			entries = JSON.parse(decrypted);
-		} catch {
-			entries = [];
-		}
-		loading = false;
-	}
-
-	async function saveEntries(newEntries: JournalEntry[] = entries) {
-		const json = JSON.stringify(newEntries);
-		const encrypted = await encrypt(auth.password!, json);
-
-		const res = await fetch('/api/journal', {
-			method: 'PUT',
-			headers: {
-				Authorization: auth.hashedPassword!,
-				'Content-Type': 'text/plain'
-			},
-			body: encrypted
-		});
-
-		if (!res.ok) {
-			toast('Failed to save journal', false);
-		} else {
-			toast('Journal saved', true);
-		}
-	}
 
 	async function addEntry() {
 		if (!newEntry.trim()) return;
 
 		const revision: Revision = { content: newEntry.trim(), date: Date.now() };
-		const newEntries = [[revision], ...entries];
+		const newEntries = [[revision], ...journal.entries];
 		newEntry = '';
 
 		await saveEntries(newEntries);
@@ -103,7 +37,7 @@
 
 	function startEditing(index: number) {
 		editingIndex = index;
-		editingContent = latest(entries[index]).content;
+		editingContent = latest(journal.entries[index]).content;
 	}
 
 	function cancelEditing() {
@@ -112,13 +46,13 @@
 	}
 
 	async function saveEdit(index: number) {
-		if (!editingContent.trim() || editingContent.trim() === latest(entries[index]).content) {
+		if (!editingContent.trim() || editingContent.trim() === latest(journal.entries[index]).content) {
 			cancelEditing();
 			return;
 		}
 
 		const revision: Revision = { content: editingContent.trim(), date: Date.now() };
-		entries[index] = [...entries[index], revision];
+		journal.entries[index] = [...journal.entries[index], revision];
 		editingIndex = null;
 		editingContent = '';
 
@@ -150,7 +84,16 @@
 
 <div class="min-h-screen bg-white p-8 dark:bg-black">
 	<div class="mx-auto max-w-lg">
-		<h1 class="mb-6 text-xl font-bold text-black dark:text-white">Journal</h1>
+		<div class="mb-6 flex items-center justify-between">
+			<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
+			<a
+				href="/stats"
+				class="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-black dark:hover:text-white"
+			>
+				<ChartBar class="h-3.5 w-3.5" />
+				Stats
+			</a>
+		</div>
 
 		<form onsubmit={(e) => { e.preventDefault(); addEntry(); }} class="mb-8 space-y-2">
 			<textarea
@@ -179,7 +122,7 @@
 			/>
 		</div>
 
-		{#if loading}
+		{#if journal.loading}
 			<p class="text-sm text-neutral-500">Loading...</p>
 		{:else if filteredEntries.length === 0}
 			<p class="text-sm text-neutral-500">{search.trim() ? 'No matching entries.' : 'No entries yet.'}</p>
@@ -268,7 +211,7 @@
 					<XMark />
 				</button>
 			</div>
-			{#each [...entries[historyIndex]].reverse() as rev, i}
+			{#each [...journal.entries[historyIndex]].reverse() as rev, i}
 				<div class="mb-3 {i > 0 ? 'border-t border-neutral-200 pt-3 dark:border-neutral-800' : ''}">
 					<p class="mb-1 text-xs text-neutral-500">
 						{formatDate(rev.date)}
