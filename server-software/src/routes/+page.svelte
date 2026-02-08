@@ -16,6 +16,7 @@
 	let loading = $state(true);
 	let editingIndex: number | null = $state(null);
 	let editingContent = $state('');
+	let historyIndex: number | null = $state(null);
 
 	function latest(entry: JournalEntry): Revision {
 		return entry[entry.length - 1];
@@ -198,6 +199,14 @@
 							>
 								modify
 							</button>
+							{#if entry.length > 1}
+								<button
+									onclick={() => historyIndex = i}
+									class="shrink-0 cursor-pointer text-xs text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100"
+								>
+									history
+								</button>
+							{/if}
 						</div>
 					{/if}
 				{/each}
@@ -205,3 +214,40 @@
 		{/if}
 	</div>
 </div>
+
+{#if historyIndex !== null}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onclick={() => historyIndex = null}
+		onkeydown={(e) => { if (e.key === 'Escape') historyIndex = null; }}
+		role="dialog"
+		tabindex="-1"
+	>
+		<div
+			class="max-h-[80vh] w-full max-w-md overflow-y-auto border border-black bg-white p-6 dark:border-white dark:bg-black"
+			onclick={(e) => e.stopPropagation()}
+			role="document"
+		>
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-sm font-bold text-black dark:text-white">Revision history</h2>
+				<button
+					onclick={() => historyIndex = null}
+					class="cursor-pointer text-xs text-neutral-400 hover:text-black dark:hover:text-white"
+				>
+					close
+				</button>
+			</div>
+			{#each [...entries[historyIndex]].reverse() as rev, i}
+				<div class="mb-3 {i > 0 ? 'border-t border-neutral-200 pt-3 dark:border-neutral-800' : ''}">
+					<p class="mb-1 text-xs text-neutral-500">
+						{formatDate(rev.date)}
+						{#if i === 0}
+							<span class="text-neutral-400">(current)</span>
+						{/if}
+					</p>
+					<p class="text-sm text-black dark:text-white">{rev.content}</p>
+				</div>
+			{/each}
+		</div>
+	</div>
+{/if}
