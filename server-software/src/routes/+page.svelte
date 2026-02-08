@@ -6,6 +6,7 @@
 	import PencilSquare from '$lib/icons/PencilSquare.svelte';
 	import Clock from '$lib/icons/Clock.svelte';
 	import XMark from '$lib/icons/XMark.svelte';
+	import MagnifyingGlass from '$lib/icons/MagnifyingGlass.svelte';
 
 	interface Revision {
 		content: string;
@@ -20,6 +21,18 @@
 	let editingIndex: number | null = $state(null);
 	let editingContent = $state('');
 	let historyIndex: number | null = $state(null);
+	let search = $state('');
+
+	let filteredEntries: { entry: JournalEntry; originalIndex: number }[] = $derived(
+		search.trim()
+			? entries
+				.map((entry, i) => ({ entry, originalIndex: i }))
+				.filter(({ entry }) => {
+					const content = latest(entry).content.toLowerCase();
+					return search.trim().toLowerCase().split(/\s+/).every((word) => content.includes(word));
+				})
+			: entries.map((entry, i) => ({ entry, originalIndex: i }))
+	);
 
 	function latest(entry: JournalEntry): Revision {
 		return entry[entry.length - 1];
@@ -154,15 +167,27 @@
 			</button>
 		</form>
 
+		<div class="relative mb-6">
+			<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+				<MagnifyingGlass class="h-3.5 w-3.5" />
+			</div>
+			<input
+				bind:value={search}
+				type="text"
+				placeholder="Search entries..."
+				class="w-full border border-black bg-transparent py-2 pl-9 pr-3 text-sm text-black placeholder-neutral-400 focus:outline-none dark:border-white dark:text-white dark:placeholder-neutral-600"
+			/>
+		</div>
+
 		{#if loading}
 			<p class="text-sm text-neutral-500">Loading...</p>
-		{:else if entries.length === 0}
-			<p class="text-sm text-neutral-500">No entries yet.</p>
+		{:else if filteredEntries.length === 0}
+			<p class="text-sm text-neutral-500">{search.trim() ? 'No matching entries.' : 'No entries yet.'}</p>
 		{:else}
 			<div>
-				{#each entries as entry, i}
+				{#each filteredEntries as { entry, originalIndex }, i}
 					{@const rev = latest(entry)}
-					{@const prevRev = i > 0 ? latest(entries[i - 1]) : null}
+					{@const prevRev = i > 0 ? latest(filteredEntries[i - 1].entry) : null}
 					{#if i > 0 && prevRev && Math.abs(rev.date - prevRev.date) > 5 * 60 * 1000}
 						<hr class="my-4 border-neutral-300 dark:border-neutral-700" />
 					{/if}
@@ -171,7 +196,7 @@
 							{formatDate(rev.date)}
 						</p>
 					{/if}
-					{#if editingIndex === i}
+					{#if editingIndex === originalIndex}
 						<div class="mb-2">
 							<textarea
 								bind:value={editingContent}
@@ -180,7 +205,7 @@
 							></textarea>
 							<div class="mt-1 flex gap-2">
 								<button
-									onclick={() => saveEdit(i)}
+									onclick={() => saveEdit(originalIndex)}
 									class="cursor-pointer bg-black px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-black"
 								>
 									Save
@@ -197,7 +222,7 @@
 						<div class="mb-1 flex items-start gap-2">
 							<p class="text-sm text-black dark:text-white">&gt; {rev.content}</p>
 							<button
-								onclick={() => startEditing(i)}
+								onclick={() => startEditing(originalIndex)}
 								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
 								aria-label="Modify entry"
 							>
@@ -205,7 +230,7 @@
 							</button>
 							{#if entry.length > 1}
 								<button
-									onclick={() => historyIndex = i}
+									onclick={() => historyIndex = originalIndex}
 									class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
 									aria-label="View history"
 								>
