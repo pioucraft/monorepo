@@ -4,14 +4,22 @@
 	import { toast } from '$lib/toast.svelte';
 	import { onMount } from 'svelte';
 
-	interface JournalEntry {
+	interface Revision {
 		content: string;
 		date: number;
 	}
 
+	type JournalEntry = Revision[];
+
 	let entries: JournalEntry[] = $state([]);
 	let newEntry = $state('');
 	let loading = $state(true);
+	let editingIndex: number | null = $state(null);
+	let editingContent = $state('');
+
+	function latest(entry: JournalEntry): Revision {
+		return entry[entry.length - 1];
+	}
 
 	async function loadEntries() {
 		if (!auth.hashedPassword) {
@@ -61,18 +69,44 @@
 		if (!res.ok) {
 			toast('Failed to save journal', false);
 		} else {
-            toast('Journal saved', true);
-        }
+			toast('Journal saved', true);
+		}
 	}
 
 	async function addEntry() {
 		if (!newEntry.trim()) return;
 
-		let newEntries = [{ content: newEntry.trim(), date: Date.now() }, ...entries];
+		const revision: Revision = { content: newEntry.trim(), date: Date.now() };
+		const newEntries = [[revision], ...entries];
 		newEntry = '';
 
 		await saveEntries(newEntries);
-        await loadEntries();
+		await loadEntries();
+	}
+
+	function startEditing(index: number) {
+		editingIndex = index;
+		editingContent = latest(entries[index]).content;
+	}
+
+	function cancelEditing() {
+		editingIndex = null;
+		editingContent = '';
+	}
+
+	async function saveEdit(index: number) {
+		if (!editingContent.trim() || editingContent.trim() === latest(entries[index]).content) {
+			cancelEditing();
+			return;
+		}
+
+		const revision: Revision = { content: editingContent.trim(), date: Date.now() };
+		entries[index] = [...entries[index], revision];
+		editingIndex = null;
+		editingContent = '';
+
+		await saveEntries();
+		await loadEntries();
 	}
 
 	function formatDate(timestamp: number): string {
@@ -123,13 +157,49 @@
 		{:else}
 			<div>
 				{#each entries as entry, i}
-					{#if i > 0 && Math.abs(entry.date - entries[i - 1].date) > 5 * 60 * 1000}
+					{@const rev = latest(entry)}
+					{@const prevRev = i > 0 ? latest(entries[i - 1]) : null}
+					{#if i > 0 && prevRev && Math.abs(rev.date - prevRev.date) > 5 * 60 * 1000}
 						<hr class="my-4 border-neutral-300 dark:border-neutral-700" />
 					{/if}
-					{#if i === 0 || !sameMinute(entry.date, entries[i - 1].date)}
-						<p class="mb-1 {i > 0 ? 'mt-4' : ''} text-xs text-neutral-500">{formatDate(entry.date)}</p>
+					{#if i === 0 || (prevRev && !sameMinute(rev.date, prevRev.date))}
+						<p class="mb-1 {i > 0 ? 'mt-4' : ''} text-xs text-neutral-500">
+							{formatDate(rev.date)}
+						</p>
 					{/if}
-					<p class="mb-1 text-sm text-black dark:text-white">&gt; {entry.content}</p>
+					{#if editingIndex === i}
+						<div class="mb-2">
+							<textarea
+								bind:value={editingContent}
+								rows="2"
+								class="w-full resize-none border border-black bg-transparent px-3 py-2 text-sm text-black placeholder-neutral-400 focus:outline-none dark:border-white dark:text-white dark:placeholder-neutral-600"
+							></textarea>
+							<div class="mt-1 flex gap-2">
+								<button
+									onclick={() => saveEdit(i)}
+									class="cursor-pointer bg-black px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-black"
+								>
+									Save
+								</button>
+								<button
+									onclick={cancelEditing}
+									class="cursor-pointer border border-black px-3 py-1 text-xs font-medium text-black dark:border-white dark:text-white"
+								>
+									Cancel
+								</button>
+							</div>
+						</div>
+					{:else}
+						<div class="group mb-1 flex items-start gap-2">
+							<p class="text-sm text-black dark:text-white">&gt; {rev.content}</p>
+							<button
+								onclick={() => startEditing(i)}
+								class="shrink-0 cursor-pointer text-xs text-neutral-400 opacity-0 transition-opacity group-hover:opacity-100"
+							>
+								modify
+							</button>
+						</div>
+					{/if}
 				{/each}
 			</div>
 		{/if}
