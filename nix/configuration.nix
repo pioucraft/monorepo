@@ -30,6 +30,8 @@ in
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
 
+    boot.enableContainers = true;
+
     networking.hostName = "nixos"; # Define your hostname.
     services.resolved.enable = true;
     networking.nameservers = ["1.1.1.1" "8.8.8.8"];
