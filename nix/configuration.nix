@@ -98,8 +98,46 @@ in
             enable = true;
             nixpkgs.config.allowUnfree = true;
 
+            globals.mapleader = " ";
             colorschemes.gruvbox.enable = true;
             plugins.copilot-vim.enable = true;
+            # fuzzy finder
+            plugins.telescope = {
+                enable = true;
+                settings = {
+                    defaults = {
+                        file_ignore_patterns = [ "node_modules" "dist" ".git" ];
+                        vimgrep_arguments = [
+                            "${pkgs.ripgrep}/bin/rg"
+                            "--color=never"
+                            "--no-heading"
+                            "--with-filename"
+                            "--line-number"
+                            "--column"
+                            "--smart-case"
+                            "--hidden"
+                            "--glob=!.git/"
+                        ];
+                    };
+                };
+                extensions.fzf-native.enable = true;
+            };
+            plugins.web-devicons.enable = true;
+            # file explorer
+            plugins.nvim-tree = {
+                enable = true;
+                settings = {
+                    respect_buf_cwd = true;
+                    sync_root_with_cwd = true;
+                };
+            };
+            # keymaps for fuzzy finder + <leader> e for file explorer
+            keymaps = [
+                { key = "<leader>f"; action = "<cmd>Telescope find_files<CR>"; options.desc = "Find files"; }
+                { key = "<leader>g"; action = "<cmd>Telescope live_grep<CR>"; options.desc = "Live grep"; }
+                { key = "<leader>e"; action = "<cmd>NvimTreeToggle<CR>"; options.desc = "Toggle file explorer"; }
+            ];
+
 
             opts = {
                 expandtab = true;
