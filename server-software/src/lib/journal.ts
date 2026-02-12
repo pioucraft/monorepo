@@ -1,6 +1,7 @@
 import { auth } from '$lib/auth.svelte';
 import { encrypt, decrypt } from '$lib/crypto.client';
 import { toast } from '$lib/toast.svelte';
+import { writable } from 'svelte/store';
 
 export interface Revision {
 	content: string;
@@ -13,26 +14,11 @@ export interface JournalEntry {
 	version: number;
 }
 
-class JournalState {
-	entries: JournalEntry[] = $state([]);
-	loading: boolean = $state(true);
-}
+export const entries = writable<JournalEntry[]>([]);
+export const loading = writable(true);
 
-export const journal = new JournalState();
-
-export function parseContent(content: string, entryIndex?: number): string {
-	let checkboxIndex = 0;
-	return content
-		.replace(/\n/g, '<br>')
-		.replace(/\[(\s*x?)\]/gi, (match, inside) => {
-			const checked = inside.toLowerCase().includes('x');
-			const idx = checkboxIndex++;
-			if (entryIndex !== undefined) {
-				return `<input type="checkbox" ${checked ? 'checked' : ''} onclick="window.toggleCheckbox(${entryIndex}, ${idx})" />`;
-			} else {
-				return `<input type="checkbox" ${checked ? 'checked' : ''} disabled />`;
-			}
-		});
+export function parseContent(content: string): string {
+	return content.replace(/\n/g, '<br>');
 }
 
 export function latest(entry: JournalEntry): Revision {
@@ -40,8 +26,10 @@ export function latest(entry: JournalEntry): Revision {
 }
 
 export async function loadEntries() {
+	loading.set(true);
 	if (!auth.hashedPassword) {
-		journal.loading = false;
+		entries.set([]);
+		loading.set(false);
 		return;
 	}
 
@@ -51,28 +39,30 @@ export async function loadEntries() {
 
 	if (!res.ok) {
 		toast('Failed to load journal', false);
-		journal.loading = false;
+		loading.set(false);
 		return;
 	}
 
 	const raw = await res.text();
 	if (!raw) {
-		journal.entries = [];
-		journal.loading = false;
+		entries.set([]);
+		loading.set(false);
 		return;
 	}
 
 	try {
 		const decrypted = await decrypt(auth.password!, raw);
-		journal.entries = JSON.parse(decrypted);
+		entries.set(JSON.parse(decrypted));
 	} catch {
-		journal.entries = [];
+		entries.set([]);
 	}
-	journal.loading = false;
+	loading.set(false);
 }
 
-export async function saveEntries(newEntries: JournalEntry[] = journal.entries) {
-	const json = JSON.stringify(newEntries);
+export async function saveEntries() {
+	let currentEntries: JournalEntry[] = [];
+	entries.subscribe(value => currentEntries = value)();
+	const json = JSON.stringify(currentEntries);
 	const encrypted = await encrypt(auth.password!, json);
 
 	const res = await fetch('/api/journal', {

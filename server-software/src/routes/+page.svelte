@@ -63,6 +63,34 @@
 		await loadEntries();
 	}
 
+	async function toggleCheckbox(entryIndex: number, checkboxIndex: number) {
+		const currentContent = latest(journal.entries[entryIndex]).content;
+		const regex = /\[(\s*x?)\]/gi;
+		let match;
+		let matches = [];
+		while ((match = regex.exec(currentContent)) !== null) {
+			matches.push({ index: match.index, match: match[0], checked: match[1].toLowerCase().includes('x') });
+		}
+		if (checkboxIndex >= matches.length) return;
+		const target = matches[checkboxIndex];
+		const newChecked = !target.checked;
+		const newSymbol = newChecked ? '[x]' : '[ ]';
+		const newContent = currentContent.slice(0, target.index) + newSymbol + currentContent.slice(target.index + target.match.length);
+
+		const revision: Revision = { content: newContent, date: Date.now() };
+		const newJournal = journal.entries.map((entry, i) =>
+			i === entryIndex ? { ...entry, history: [...entry.history, revision] } : entry
+		);
+
+		await saveEntries(newJournal);
+		await loadEntries();
+	}
+
+	// Expose toggleCheckbox globally
+	if (typeof window !== 'undefined') {
+		(window as any).toggleCheckbox = toggleCheckbox;
+	}
+
 	function formatDate(timestamp: number): string {
 		const d = new Date(timestamp);
 		const day = d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -174,7 +202,7 @@
 						</div>
 					{:else}
 						<div class="mb-1 flex items-start gap-2">
-							<p class="text-sm text-black dark:text-white">&gt; {@html parseContent(rev.content)}</p>
+							<p class="text-sm text-black dark:text-white">&gt; {@html parseContent(rev.content, originalIndex)}</p>
 							<button
 								onclick={() => actionModalIndex = originalIndex}
 								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white rotate-90 float-start"
