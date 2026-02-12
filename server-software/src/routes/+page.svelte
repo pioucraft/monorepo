@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { journal, latest, loadEntries, saveEntries, type JournalEntry, type Revision } from '$lib/journal.svelte';
+	import { journal, latest, loadEntries, saveEntries, parseContent, type JournalEntry, type Revision } from '$lib/journal.svelte';
 	import { onMount } from 'svelte';
 	import PencilSquare from '$lib/icons/PencilSquare.svelte';
 	import Clock from '$lib/icons/Clock.svelte';
@@ -174,7 +174,7 @@
 						</div>
 					{:else}
 						<div class="mb-1 flex items-start gap-2">
-							<p class="text-sm text-black dark:text-white">&gt; {rev.content}</p>
+							<p class="text-sm text-black dark:text-white">&gt; {@html parseContent(rev.content)}</p>
 							<button
 								onclick={() => actionModalIndex = originalIndex}
 								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
@@ -221,7 +221,7 @@
 							<span class="text-neutral-400">(current)</span>
 						{/if}
 					</p>
-					<p class="text-sm text-black dark:text-white">{rev.content}</p>
+					<p class="text-sm text-black dark:text-white">{@html parseContent(rev.content)}</p>
 				</div>
 			{/each}
 		</div>

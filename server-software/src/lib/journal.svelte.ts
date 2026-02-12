@@ -20,6 +20,10 @@ class JournalState {
 
 export const journal = new JournalState();
 
+export function parseContent(content: string): string {
+	return content.replace(/\n/g, '<br>');
+}
+
 export function latest(entry: JournalEntry): Revision {
 	return entry.history[entry.history.length - 1];
 }
