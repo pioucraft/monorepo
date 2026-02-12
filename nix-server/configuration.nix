@@ -129,6 +129,7 @@ in
     users.users.nix.openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC1Gr/WhLeFAJKty2CiCcn0Wc5ld2fJF7lRhGW5DVjxd nathangasser@nixos"
         "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLsh0zXGiB3PObOO1p1nQk8yybMynBxOj2fyemuxWQiRNrNTwKwisQ7qCi7+HkrPbozsOMCPoKaQ0W44D8D/MDQ= #ssh.id - @pioucraft"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDy4otgTxM1yu3UGsdpgUVLky6GFp0Z3bAyFaIo9pxtH nathangasser@nixos" # Laptop
     ];
     services.openssh.settings.PasswordAuthentication = false;
 
