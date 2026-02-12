@@ -7,7 +7,11 @@ export interface Revision {
 	date: number;
 }
 
-export type JournalEntry = Revision[];
+export interface JournalEntry {
+	history: Revision[];
+	hidden: boolean;
+	version: number;
+}
 
 class JournalState {
 	entries: JournalEntry[] = $state([]);
@@ -17,7 +21,7 @@ class JournalState {
 export const journal = new JournalState();
 
 export function latest(entry: JournalEntry): Revision {
-	return entry[entry.length - 1];
+	return entry.history[entry.history.length - 1];
 }
 
 export async function loadEntries() {

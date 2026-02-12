@@ -12,23 +12,26 @@
 	let editingContent = $state('');
 	let historyIndex: number | null = $state(null);
 	let search = $state('');
+	let showHidden = $state(false);
+	let actionModalIndex: number | null = $state(null);
 
 	let filteredEntries: { entry: JournalEntry; originalIndex: number }[] = $derived(
-		search.trim()
-			? journal.entries
-				.map((entry, i) => ({ entry, originalIndex: i }))
-				.filter(({ entry }) => {
-					const content = latest(entry).content.toLowerCase();
-					return search.trim().toLowerCase().split(/\s+/).every((word) => content.includes(word));
-				})
-			: journal.entries.map((entry, i) => ({ entry, originalIndex: i }))
+		journal.entries
+			.map((entry, i) => ({ entry, originalIndex: i }))
+			.filter(({ entry }) => {
+				if (entry.hidden && !showHidden) return false;
+				if (!search.trim()) return true;
+				const content = latest(entry).content.toLowerCase();
+				return search.trim().toLowerCase().split(/\s+/).every((word) => content.includes(word));
+			})
 	);
 
 	async function addEntry() {
 		if (!newEntry.trim()) return;
 
 		const revision: Revision = { content: newEntry.trim(), date: Date.now() };
-		const newEntries = [[revision], ...journal.entries];
+		const newEntryObj: JournalEntry = { history: [revision], hidden: false, version: 1 };
+		const newEntries = [newEntryObj, ...journal.entries];
 		newEntry = '';
 
 		await saveEntries(newEntries);
@@ -52,7 +55,7 @@
 		}
 
 		const revision: Revision = { content: editingContent.trim(), date: Date.now() };
-		journal.entries[index] = [...journal.entries[index], revision];
+		journal.entries[index].history = [...journal.entries[index].history, revision];
 		editingIndex = null;
 		editingContent = '';
 
@@ -86,13 +89,21 @@
 	<div class="mx-auto max-w-lg">
 		<div class="mb-6 flex items-center justify-between">
 			<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
-			<a
-				href="/stats"
-				class="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-black dark:hover:text-white"
-			>
-				<ChartBar class="h-3.5 w-3.5" />
-				Stats
-			</a>
+			<div class="flex items-center gap-4">
+				<button
+					onclick={() => showHidden = !showHidden}
+					class="cursor-pointer border border-black px-3 py-1 text-xs font-medium text-black dark:border-white dark:text-white"
+				>
+					{showHidden ? 'Hide hidden' : 'Show hidden'}
+				</button>
+				<a
+					href="/stats"
+					class="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-black dark:hover:text-white"
+				>
+					<ChartBar class="h-3.5 w-3.5" />
+					Stats
+				</a>
+			</div>
 		</div>
 
 		<form onsubmit={(e) => { e.preventDefault(); addEntry(); }} class="mb-8 space-y-2">
@@ -165,21 +176,12 @@
 						<div class="mb-1 flex items-start gap-2">
 							<p class="text-sm text-black dark:text-white">&gt; {rev.content}</p>
 							<button
-								onclick={() => startEditing(originalIndex)}
+								onclick={() => actionModalIndex = originalIndex}
 								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
-								aria-label="Modify entry"
+								aria-label="More actions"
 							>
-								<PencilSquare class="h-3.5 w-3.5" />
+								...
 							</button>
-							{#if entry.length > 1}
-								<button
-									onclick={() => historyIndex = originalIndex}
-									class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
-									aria-label="View history"
-								>
-									<Clock class="h-3.5 w-3.5" />
-								</button>
-							{/if}
 						</div>
 					{/if}
 				{/each}
@@ -211,7 +213,7 @@
 					<XMark />
 				</button>
 			</div>
-			{#each [...journal.entries[historyIndex]].reverse() as rev, i}
+			{#each [...journal.entries[historyIndex].history].reverse() as rev, i}
 				<div class="mb-3 {i > 0 ? 'border-t border-neutral-200 pt-3 dark:border-neutral-800' : ''}">
 					<p class="mb-1 text-xs text-neutral-500">
 						{formatDate(rev.date)}
@@ -222,6 +224,70 @@
 					<p class="text-sm text-black dark:text-white">{rev.content}</p>
 				</div>
 			{/each}
+		</div>
+	</div>
+{/if}
+
+{#if actionModalIndex !== null}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+		onclick={() => actionModalIndex = null}
+		onkeydown={(e) => { if (e.key === 'Escape') actionModalIndex = null; }}
+		role="dialog"
+		tabindex="-1"
+	>
+		<div
+			class="w-full max-w-xs border border-black bg-white p-4 dark:border-white dark:bg-black"
+			onclick={(e) => e.stopPropagation()}
+			role="document"
+		>
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-sm font-bold text-black dark:text-white">Actions</h2>
+				<button
+					onclick={() => actionModalIndex = null}
+					class="cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
+					aria-label="Close"
+				>
+					<XMark />
+				</button>
+			</div>
+			<div class="space-y-2">
+				<button
+					onclick={() => { startEditing(actionModalIndex!); actionModalIndex = null; }}
+					class="flex w-full items-center gap-2 cursor-pointer border border-black py-2 px-3 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
+				>
+					<PencilSquare class="h-4 w-4" />
+					Edit
+				</button>
+				{#if journal.entries[actionModalIndex!].history.length > 1}
+					<button
+						onclick={() => { historyIndex = actionModalIndex; actionModalIndex = null; }}
+						class="flex w-full items-center gap-2 cursor-pointer border border-black py-2 px-3 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
+					>
+						<Clock class="h-4 w-4" />
+						View History
+					</button>
+				{/if}
+				<button
+					onclick={async () => {
+						journal.entries[actionModalIndex!].hidden = !journal.entries[actionModalIndex!].hidden;
+						await saveEntries();
+						await loadEntries();
+						actionModalIndex = null;
+					}}
+					class="flex w-full items-center gap-2 cursor-pointer border border-black py-2 px-3 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
+				>
+					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						{#if journal.entries[actionModalIndex!].hidden}
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+						{:else}
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+						{/if}
+					</svg>
+					{journal.entries[actionModalIndex!].hidden ? 'Unhide' : 'Hide'}
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
