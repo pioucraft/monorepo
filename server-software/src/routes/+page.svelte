@@ -177,7 +177,7 @@
 							<p class="text-sm text-black dark:text-white">&gt; {@html parseContent(rev.content)}</p>
 							<button
 								onclick={() => actionModalIndex = originalIndex}
-								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
+								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white rotate-90 float-start"
 								aria-label="More actions"
 							>
 								...
