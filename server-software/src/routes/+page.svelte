@@ -202,7 +202,7 @@
 						</div>
 					{:else}
 						<div class="mb-1 flex items-start gap-2">
-							<p class="text-sm text-black dark:text-white">&gt; {@html parseContent(rev.content, originalIndex)}</p>
+							<p class="text-sm text-black dark:text-white break-words">&gt; {@html parseContent(rev.content, originalIndex)}</p>
 							<button
 								onclick={() => actionModalIndex = originalIndex}
 								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white rotate-90 float-start"
@@ -249,7 +249,7 @@
 							<span class="text-neutral-400">(current)</span>
 						{/if}
 					</p>
-					<p class="text-sm text-black dark:text-white">{@html parseContent(rev.content)}</p>
+					<p class="text-sm text-black dark:text-white break-words">{@html parseContent(rev.content)}</p>
 				</div>
 			{/each}
 		</div>
