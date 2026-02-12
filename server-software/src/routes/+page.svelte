@@ -298,8 +298,10 @@
 				{/if}
 				<button
 					onclick={async () => {
-						journal.entries[actionModalIndex!].hidden = !journal.entries[actionModalIndex!].hidden;
-						await saveEntries();
+						const newJournal = journal.entries.map((entry, i) =>
+							i === actionModalIndex ? { ...entry, hidden: !entry.hidden } : entry
+						);
+						await saveEntries(newJournal);
 						await loadEntries();
 						actionModalIndex = null;
 					}}
