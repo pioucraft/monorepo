@@ -16,13 +16,26 @@
 	});
 
 	onMount(() => {
+		let logoutTimeout: number | null = null;
 		function handleVisibilityChange() {
 			if (document.visibilityState === 'hidden' && auth.username) {
-				clearAuth();
+				logoutTimeout = setTimeout(() => {
+					clearAuth();
+				}, 30000); // 30 seconds delay
+			} else if (document.visibilityState === 'visible') {
+				if (logoutTimeout) {
+					clearTimeout(logoutTimeout);
+					logoutTimeout = null;
+				}
 			}
 		}
 		document.addEventListener('visibilitychange', handleVisibilityChange);
-		return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			if (logoutTimeout) {
+				clearTimeout(logoutTimeout);
+			}
+		};
 	});
 </script>
 
