@@ -22,7 +22,7 @@ export const journal = new JournalState();
 
 export function parseContent(content: string, entryIndex?: number): string {
 	let checkboxIndex = 0;
-	return content
+	const processed = content
 		.replace(/\n/g, '<br>')
 		.replace(/\[(\s*x?)\]/gi, (match, inside) => {
 			const checked = inside.toLowerCase().includes('x');
@@ -33,6 +33,7 @@ export function parseContent(content: string, entryIndex?: number): string {
 				return `<input type="checkbox" ${checked ? 'checked' : ''} disabled />`;
 			}
 		});
+	return `<span style="overflow-wrap: break-word; word-break: break-word;">${processed}</span>`;
 }
 
 export function latest(entry: JournalEntry): Revision {
