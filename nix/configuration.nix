@@ -155,6 +155,11 @@ in
                     nix
                     c
                     svelte
+                    css
+                    html
+                    javascript
+                    typescript
+                    json
                 ];
                 settings = {
                     highlight.enable = true;
