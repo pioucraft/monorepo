@@ -15,6 +15,8 @@
 	let showHidden = $state(false);
 	let actionModalIndex: number | null = $state(null);
 
+	let pinnedTags = ['#readinglist'];
+
 	let filteredEntries: { entry: JournalEntry; originalIndex: number }[] = $derived(
 		journal.entries
 			.map((entry, i) => ({ entry, originalIndex: i }))
@@ -36,6 +38,10 @@
 
 		await saveEntries(newEntries);
 		await loadEntries();
+	}
+
+	function addTag(tag: string) {
+		newEntry = newEntry.trim() === '' ? tag : `${newEntry} ${tag}`;
 	}
 
 	function startEditing(index: number) {
@@ -141,6 +147,17 @@
 				rows="3"
 				class="w-full resize-none border border-black bg-transparent px-3 py-2 text-sm text-black placeholder-neutral-400 focus:outline-none dark:border-white dark:text-white dark:placeholder-neutral-600"
 			></textarea>
+			<div class="flex flex-wrap gap-2">
+				{#each pinnedTags as tag}
+					<button
+						type="button"
+						onclick={() => addTag(tag)}
+						class="cursor-pointer border border-black px-3 py-1 text-xs font-medium text-black dark:border-white dark:text-white"
+					>
+						{tag}
+					</button>
+				{/each}
+			</div>
 			<button
 				type="submit"
 				class="w-full cursor-pointer bg-black py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
