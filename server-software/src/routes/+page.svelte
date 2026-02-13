@@ -52,6 +52,18 @@
 		await loadEntries();
 	}
 
+	async function saveTask() {
+		if (!newEntry.trim()) return;
+
+		const revision: Revision = { content: `- [ ] ${newEntry.trim()}`, date: Date.now() };
+		const newEntryObj: JournalEntry = { history: [revision], hidden: false, version: 1 };
+		const newEntries = [newEntryObj, ...journal.entries];
+		newEntry = '';
+
+		await saveEntries(newEntries);
+		await loadEntries();
+	}
+
 	function addTag(tag: string) {
 		newEntry = newEntry.trim() === '' ? tag : `${newEntry} ${tag}`;
 	}
@@ -167,13 +179,7 @@
 			</div>
 		</div>
 
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				addEntry();
-			}}
-			class="mb-8 space-y-2"
-		>
+		<div class="mb-8 space-y-2">
 			<textarea
 				bind:value={newEntry}
 				placeholder="Write something..."
@@ -191,13 +197,21 @@
 					</button>
 				{/each}
 			</div>
-			<button
-				type="submit"
-				class="w-full cursor-pointer bg-black py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-			>
-				Add entry
-			</button>
-		</form>
+			<div class="flex gap-2">
+				<button
+					onclick={addEntry}
+					class="flex-1 cursor-pointer bg-black py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+				>
+					Add entry
+				</button>
+				<button
+					onclick={saveTask}
+					class="flex-1 cursor-pointer border border-black px-3 py-2 text-sm font-medium text-black dark:border-white dark:text-white"
+				>
+					Save task
+				</button>
+			</div>
+		</div>
 
 		<div class="relative mb-6">
 			<div
