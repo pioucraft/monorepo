@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { journal, latest, loadEntries, saveEntries, parseContent, type JournalEntry, type Revision } from '$lib/journal.svelte';
+	import {
+		journal,
+		latest,
+		loadEntries,
+		saveEntries,
+		parseContent,
+		type JournalEntry,
+		type Revision
+	} from '$lib/journal.svelte';
 	import { onMount } from 'svelte';
 	import PencilSquare from '$lib/icons/PencilSquare.svelte';
 	import Clock from '$lib/icons/Clock.svelte';
@@ -24,7 +32,11 @@
 				if (entry.hidden && !showHidden) return false;
 				if (!search.trim()) return true;
 				const content = latest(entry).content.toLowerCase();
-				return search.trim().toLowerCase().split(/\s+/).every((word) => content.includes(word));
+				return search
+					.trim()
+					.toLowerCase()
+					.split(/\s+/)
+					.every((word) => content.includes(word));
 			})
 	);
 
@@ -55,7 +67,10 @@
 	}
 
 	async function saveEdit(index: number) {
-		if (!editingContent.trim() || editingContent.trim() === latest(journal.entries[index]).content) {
+		if (
+			!editingContent.trim() ||
+			editingContent.trim() === latest(journal.entries[index]).content
+		) {
 			cancelEditing();
 			return;
 		}
@@ -75,13 +90,20 @@
 		let match;
 		let matches = [];
 		while ((match = regex.exec(currentContent)) !== null) {
-			matches.push({ index: match.index, match: match[0], checked: match[1].toLowerCase().includes('x') });
+			matches.push({
+				index: match.index,
+				match: match[0],
+				checked: match[1].toLowerCase().includes('x')
+			});
 		}
 		if (checkboxIndex >= matches.length) return;
 		const target = matches[checkboxIndex];
 		const newChecked = !target.checked;
 		const newSymbol = newChecked ? '[x]' : '[ ]';
-		const newContent = currentContent.slice(0, target.index) + newSymbol + currentContent.slice(target.index + target.match.length);
+		const newContent =
+			currentContent.slice(0, target.index) +
+			newSymbol +
+			currentContent.slice(target.index + target.match.length);
 
 		const revision: Revision = { content: newContent, date: Date.now() };
 		const newJournal = journal.entries.map((entry, i) =>
@@ -99,7 +121,12 @@
 
 	function formatDate(timestamp: number): string {
 		const d = new Date(timestamp);
-		const day = d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+		const day = d.toLocaleDateString(undefined, {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
 		const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 		return `${day} ${time}`;
 	}
@@ -125,7 +152,7 @@
 			<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
 			<div class="flex items-center gap-4">
 				<button
-					onclick={() => showHidden = !showHidden}
+					onclick={() => (showHidden = !showHidden)}
 					class="cursor-pointer border border-black px-3 py-1 text-xs font-medium text-black dark:border-white dark:text-white"
 				>
 					{showHidden ? 'Hide hidden' : 'Show hidden'}
@@ -140,7 +167,13 @@
 			</div>
 		</div>
 
-		<form onsubmit={(e) => { e.preventDefault(); addEntry(); }} class="mb-8 space-y-2">
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				addEntry();
+			}}
+			class="mb-8 space-y-2"
+		>
 			<textarea
 				bind:value={newEntry}
 				placeholder="Write something..."
@@ -167,21 +200,25 @@
 		</form>
 
 		<div class="relative mb-6">
-			<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400">
+			<div
+				class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-400"
+			>
 				<MagnifyingGlass class="h-3.5 w-3.5" />
 			</div>
 			<input
 				bind:value={search}
 				type="text"
 				placeholder="Search entries..."
-				class="w-full border border-black bg-transparent py-2 pl-9 pr-3 text-sm text-black placeholder-neutral-400 focus:outline-none dark:border-white dark:text-white dark:placeholder-neutral-600"
+				class="w-full border border-black bg-transparent py-2 pr-3 pl-9 text-sm text-black placeholder-neutral-400 focus:outline-none dark:border-white dark:text-white dark:placeholder-neutral-600"
 			/>
 		</div>
 
 		{#if journal.loading}
 			<p class="text-sm text-neutral-500">Loading...</p>
 		{:else if filteredEntries.length === 0}
-			<p class="text-sm text-neutral-500">{search.trim() ? 'No matching entries.' : 'No entries yet.'}</p>
+			<p class="text-sm text-neutral-500">
+				{search.trim() ? 'No matching entries.' : 'No entries yet.'}
+			</p>
 		{:else}
 			<div>
 				{#each filteredEntries as { entry, originalIndex }, i}
@@ -219,10 +256,12 @@
 						</div>
 					{:else}
 						<div class="mb-1 flex items-start gap-2">
-							<p class="text-sm text-black dark:text-white flex-1">&gt; {@html parseContent(rev.content, originalIndex)}</p>
+							<p class="flex-1 text-sm text-black dark:text-white">
+								&gt; {@html parseContent(rev.content, originalIndex)}
+							</p>
 							<button
-								onclick={() => actionModalIndex = originalIndex}
-								class="shrink-0 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white rotate-90 float-start"
+								onclick={() => (actionModalIndex = originalIndex)}
+								class="float-start shrink-0 rotate-90 cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
 								aria-label="More actions"
 							>
 								...
@@ -238,8 +277,10 @@
 {#if historyIndex !== null}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onclick={() => historyIndex = null}
-		onkeydown={(e) => { if (e.key === 'Escape') historyIndex = null; }}
+		onclick={() => (historyIndex = null)}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') historyIndex = null;
+		}}
 		role="dialog"
 		tabindex="-1"
 	>
@@ -251,7 +292,7 @@
 			<div class="mb-4 flex items-center justify-between">
 				<h2 class="text-sm font-bold text-black dark:text-white">Revision history</h2>
 				<button
-					onclick={() => historyIndex = null}
+					onclick={() => (historyIndex = null)}
 					class="cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
 					aria-label="Close"
 				>
@@ -276,8 +317,10 @@
 {#if actionModalIndex !== null}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-		onclick={() => actionModalIndex = null}
-		onkeydown={(e) => { if (e.key === 'Escape') actionModalIndex = null; }}
+		onclick={() => (actionModalIndex = null)}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') actionModalIndex = null;
+		}}
 		role="dialog"
 		tabindex="-1"
 	>
@@ -289,7 +332,7 @@
 			<div class="mb-4 flex items-center justify-between">
 				<h2 class="text-sm font-bold text-black dark:text-white">Actions</h2>
 				<button
-					onclick={() => actionModalIndex = null}
+					onclick={() => (actionModalIndex = null)}
 					class="cursor-pointer text-neutral-400 hover:text-black dark:hover:text-white"
 					aria-label="Close"
 				>
@@ -298,16 +341,22 @@
 			</div>
 			<div class="space-y-2">
 				<button
-					onclick={() => { startEditing(actionModalIndex!); actionModalIndex = null; }}
-					class="flex w-full items-center gap-2 cursor-pointer border border-black py-2 px-3 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
+					onclick={() => {
+						startEditing(actionModalIndex!);
+						actionModalIndex = null;
+					}}
+					class="flex w-full cursor-pointer items-center gap-2 border border-black px-3 py-2 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
 				>
 					<PencilSquare class="h-4 w-4" />
 					Edit
 				</button>
 				{#if journal.entries[actionModalIndex!].history.length > 1}
 					<button
-						onclick={() => { historyIndex = actionModalIndex; actionModalIndex = null; }}
-						class="flex w-full items-center gap-2 cursor-pointer border border-black py-2 px-3 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
+						onclick={() => {
+							historyIndex = actionModalIndex;
+							actionModalIndex = null;
+						}}
+						class="flex w-full cursor-pointer items-center gap-2 border border-black px-3 py-2 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
 					>
 						<Clock class="h-4 w-4" />
 						View History
@@ -322,14 +371,29 @@
 						await loadEntries();
 						actionModalIndex = null;
 					}}
-					class="flex w-full items-center gap-2 cursor-pointer border border-black py-2 px-3 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
+					class="flex w-full cursor-pointer items-center gap-2 border border-black px-3 py-2 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
 				>
 					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						{#if journal.entries[actionModalIndex!].hidden}
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+							/>
 						{:else}
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+							/>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+							/>
 						{/if}
 					</svg>
 					{journal.entries[actionModalIndex!].hidden ? 'Unhide' : 'Hide'}

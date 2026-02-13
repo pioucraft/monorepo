@@ -39,7 +39,9 @@ function hash(input: string): string {
 }
 
 async function main() {
-	console.log('\x1b[41m\x1b[37m\x1b[1m WARNING: Only run this script on a local machine. Never run it on a VPS. \x1b[0m\n');
+	console.log(
+		'\x1b[41m\x1b[37m\x1b[1m WARNING: Only run this script on a local machine. Never run it on a VPS. \x1b[0m\n'
+	);
 
 	const password = await promptHidden('Enter password: ');
 

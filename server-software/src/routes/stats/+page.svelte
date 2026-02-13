@@ -8,7 +8,10 @@
 	let totalWords = $derived(
 		journal.entries.reduce((sum, entry) => {
 			const content = latest(entry).content;
-			const words = content.trim().split(/\s+/).filter((w) => w.length > 0);
+			const words = content
+				.trim()
+				.split(/\s+/)
+				.filter((w) => w.length > 0);
 			return sum + words.length;
 		}, 0)
 	);
@@ -72,7 +75,9 @@
 					{:else}
 						<div class="flex flex-wrap gap-2">
 							{#each tags() as { tag, count }}
-								<span class="border border-black px-2 py-1 text-xs text-black dark:border-white dark:text-white">
+								<span
+									class="border border-black px-2 py-1 text-xs text-black dark:border-white dark:text-white"
+								>
 									{tag} <span class="text-neutral-400">({count})</span>
 								</span>
 							{/each}

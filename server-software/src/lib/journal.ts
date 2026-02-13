@@ -61,7 +61,7 @@ export async function loadEntries() {
 
 export async function saveEntries() {
 	let currentEntries: JournalEntry[] = [];
-	entries.subscribe(value => currentEntries = value)();
+	entries.subscribe((value) => (currentEntries = value))();
 	const json = JSON.stringify(currentEntries);
 	const encrypted = await encrypt(auth.password!, json);
 

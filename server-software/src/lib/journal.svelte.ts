@@ -24,7 +24,10 @@ export function parseContent(content: string, entryIndex?: number): string {
 	let checkboxIndex = 0;
 	let processed = content
 		// Make links clickable
-		.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">$1</a>')
+		.replace(
+			/(https?:\/\/[^\s]+)/g,
+			'<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">$1</a>'
+		)
 		// Replace newlines
 		.replace(/\n/g, '<br>')
 		// Handle checkboxes
