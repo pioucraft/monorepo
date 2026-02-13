@@ -350,6 +350,7 @@ in
                     "$mod, Space, exec, wofi --show drun"
                     "$mod, B, exec, $browser"
                     "$mod, Q, killactive"
+                    "$mod, F, togglefloating"
                     "$mod Control, l, exec, hyprlock"
                     ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
                     ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
@@ -368,6 +369,11 @@ in
                         )
                     9)
                   );
+
+                bindm = [
+                    "$mod, mouse:272, movewindow"
+                    "$mod, mouse:273, resizewindow"
+                ];
                 input = {
                     kb_layout = "ch";
                     kb_variant = "fr";
