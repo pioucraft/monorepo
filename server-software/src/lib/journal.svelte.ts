@@ -28,18 +28,14 @@ export function parseContent(content: string, entryIndex?: number): string {
 		// Replace newlines
 		.replace(/\n/g, '<br>')
 		// Handle checkboxes
-		.replace(/\[(\s*x?|-)\]/gi, (match, inside) => {
+		.replace(/\[(\s*x?)\]/gi, (match, inside) => {
 			const checked = inside.toLowerCase().includes('x');
-			const indeterminate = inside === '-';
 			const idx = checkboxIndex++;
-			let attributes = '';
-			if (checked) attributes += ' checked';
-			if (indeterminate) attributes += ' indeterminate';
-			if (indeterminate || entryIndex === undefined) attributes += ' disabled';
-			if (entryIndex !== undefined && !indeterminate) {
-				attributes += ` onclick="window.toggleCheckbox(${entryIndex}, ${idx})"`;
+			if (entryIndex !== undefined) {
+				return `<input type="checkbox" ${checked ? 'checked' : ''} onclick="window.toggleCheckbox(${entryIndex}, ${idx})" />`;
+			} else {
+				return `<input type="checkbox" ${checked ? 'checked' : ''} disabled />`;
 			}
-			return `<input type="checkbox"${attributes} />`;
 		});
 	return `<span style="overflow-wrap: break-word; word-break: break-word;">${processed}</span>`;
 }
