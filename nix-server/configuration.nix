@@ -209,112 +209,36 @@ in
         };
     };
 
-    # Mullvad VPN Container
-    containers.mullvad = {
-        autoStart = true;
-        
-        bindMounts = {
-            "/etc/mullvad/creds" = {
-                hostPath = "/home/nix/git/monorepo/nix-server/.env";
-                isReadOnly = true;
-            };
-        };
-        
-        # Allow container to manage network interfaces and firewall
-        allowedDevices = [
-            { node = "/dev/net/tun"; modifier = "rwm"; }
-        ];
-        
-        # Add capabilities for VPN (NET_ADMIN for network interface management)
-        additionalCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" ];
-        
-        config = { config, pkgs, ... }: {
-            system.stateVersion = "25.05";
-            
-            # Create tun device for VPN
-            boot.kernelModules = [ "tun" ];
-            
-            # Ensure iptables is available
-            networking.firewall.enable = true;
-            
-            services.mullvad-vpn = {
-                enable = true;
-                package = pkgs.mullvad;
-            };
-            
-            # Login to Mullvad account after daemon starts
-            systemd.services.mullvad-login = {
-                description = "Login to Mullvad VPN";
-                after = [ "mullvad-daemon.service" "network-online.target" ];
-                requires = [ "mullvad-daemon.service" "network-online.target" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    ExecStart = pkgs.writeShellScript "mullvad-login" ''
-                        set -e
-                        # Source the credentials file
-                        source /etc/mullvad/creds
-                        # Wait for daemon socket to be ready
-                        for i in $(seq 1 60); do
-                            if ${pkgs.mullvad}/bin/mullvad status &>/dev/null; then
-                                break
-                            fi
-                            echo "Waiting for Mullvad daemon... ($i/60)"
-                            sleep 1
-                        done
-                        # Login with account number
-                        ${pkgs.mullvad}/bin/mullvad account login "''${MULLVAD_ACCOUNT_NUMBER}"
-                    '';
-                };
-            };
-            
-            # Set relay location and connect to Mullvad VPN
-            systemd.services.mullvad-connect = {
-                description = "Connect to Mullvad VPN";
-                after = [ "mullvad-login.service" ];
-                requires = [ "mullvad-login.service" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    ExecStart = pkgs.writeShellScript "mullvad-connect" ''
-                        set -e
-                        # Set relay to auto (or specify a country like 'se' for Sweden)
-                        ${pkgs.mullvad}/bin/mullvad relay set location any
-                        # Connect to VPN
-                        ${pkgs.mullvad}/bin/mullvad connect
-                        # Wait for connection
-                        for i in $(seq 1 30); do
-                            status=$(${pkgs.mullvad}/bin/mullvad status | head -1)
-                            if [[ "$status" == *"Connected"* ]]; then
-                                echo "Successfully connected to Mullvad VPN"
-                                break
-                            fi
-                            echo "Waiting for VPN connection... ($i/30)"
-                            sleep 1
-                        done
-                    '';
-                };
-            };
-            
-            # Enable kill switch to block traffic when VPN disconnects
-            systemd.services.mullvad-killswitch = {
-                description = "Enable Mullvad kill switch";
-                after = [ "mullvad-connect.service" ];
-                requires = [ "mullvad-connect.service" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    ExecStart = "${pkgs.mullvad}/bin/mullvad lockdown-mode set on";
-                };
-            };
-            
-            environment.systemPackages = with pkgs; [
-                mullvad
-                iptables
-            ];
+    # Mullvad VPN
+    services.mullvad-vpn = {
+        enable = true;
+        package = pkgs.mullvad;
+    };
+
+    # Auto-login and connect to Mullvad
+    systemd.services.mullvad-setup = {
+        description = "Auto-setup Mullvad VPN";
+        after = [ "mullvad-daemon.service" "network-online.target" ];
+        requires = [ "mullvad-daemon.service" "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
+            ExecStart = pkgs.writeShellScript "mullvad-setup" ''
+                set -e
+                # Wait for daemon
+                for i in $(seq 1 30); do
+                    if ${pkgs.mullvad}/bin/mullvad status &>/dev/null; then
+                        break
+                    fi
+                    sleep 1
+                done
+                # Login and connect
+                ${pkgs.mullvad}/bin/mullvad account login "''${MULLVAD_ACCOUNT_NUMBER}"
+                ${pkgs.mullvad}/bin/mullvad relay set location any
+                ${pkgs.mullvad}/bin/mullvad connect
+            '';
         };
     };
 
