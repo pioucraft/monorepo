@@ -212,9 +212,6 @@ in
     # Mullvad VPN Container
     containers.mullvad = {
         autoStart = true;
-        privateNetwork = true;
-        hostAddress = "192.168.100.10";
-        localAddress = "192.168.100.11";
         
         bindMounts = {
             "/etc/mullvad/creds" = {
@@ -234,8 +231,8 @@ in
             # Login to Mullvad account after daemon starts
             systemd.services.mullvad-login = {
                 description = "Login to Mullvad VPN";
-                after = [ "mullvad-daemon.service" ];
-                requires = [ "mullvad-daemon.service" ];
+                after = [ "mullvad-daemon.service" "network-online.target" ];
+                requires = [ "mullvad-daemon.service" "network-online.target" ];
                 wantedBy = [ "multi-user.target" ];
                 serviceConfig = {
                     Type = "oneshot";
@@ -245,11 +242,11 @@ in
                         # Source the credentials file
                         source /etc/mullvad/creds
                         # Wait for daemon socket to be ready
-                        for i in $(seq 1 30); do
+                        for i in $(seq 1 60); do
                             if ${pkgs.mullvad}/bin/mullvad status &>/dev/null; then
                                 break
                             fi
-                            echo "Waiting for Mullvad daemon... ($i/30)"
+                            echo "Waiting for Mullvad daemon... ($i/60)"
                             sleep 1
                         done
                         # Login with account number
@@ -267,7 +264,21 @@ in
                 serviceConfig = {
                     Type = "oneshot";
                     RemainAfterExit = true;
-                    ExecStart = "${pkgs.mullvad}/bin/mullvad connect";
+                    ExecStart = pkgs.writeShellScript "mullvad-connect" ''
+                        set -e
+                        # Connect to VPN
+                        ${pkgs.mullvad}/bin/mullvad connect
+                        # Wait for connection
+                        for i in $(seq 1 30); do
+                            status=$(${pkgs.mullvad}/bin/mullvad status | head -1)
+                            if [[ "$status" == *"Connected"* ]]; then
+                                echo "Successfully connected to Mullvad VPN"
+                                break
+                            fi
+                            echo "Waiting for VPN connection... ($i/30)"
+                            sleep 1
+                        done
+                    '';
                 };
             };
             
