@@ -173,20 +173,20 @@ in
 
     systemd.services.data-backup-notify-success = {
         description = "Notify Telegram of successful backup";
-        path = with pkgs; [ curl ];
+        path = with pkgs; [ curl coreutils ];
         serviceConfig = {
             Type = "oneshot";
-            ExecStart = "/home/nix/git/monorepo/nix-server/telegram-notify.sh '✅ Backup completed successfully at %H:%M:%S on %Y-%m-%d'";
+            ExecStart = "/home/nix/git/monorepo/nix-server/telegram-notify.sh '✅ Backup completed successfully'";
             User = "nix";
         };
     };
 
     systemd.services.data-backup-notify-failure = {
         description = "Notify Telegram of failed backup";
-        path = with pkgs; [ curl ];
+        path = with pkgs; [ curl coreutils ];
         serviceConfig = {
             Type = "oneshot";
-            ExecStart = "/home/nix/git/monorepo/nix-server/telegram-notify.sh '❌ Backup failed at %H:%M:%S on %Y-%m-%d'";
+            ExecStart = "/home/nix/git/monorepo/nix-server/telegram-notify.sh '❌ Backup failed'";
             User = "nix";
         };
     };
