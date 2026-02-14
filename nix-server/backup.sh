@@ -42,8 +42,11 @@ tar -czf "$ARCHIVE_PATH" -C "$DATA_DIR" .
 
 # Upload to R2
 echo "Uploading to Cloudflare R2..."
-aws s3 cp "$ARCHIVE_PATH" "s3://$R2_BUCKET_NAME/$TIMESTAMP/$ARCHIVE_NAME" \
+if ! aws s3 cp "$ARCHIVE_PATH" "s3://$R2_BUCKET_NAME/$TIMESTAMP/$ARCHIVE_NAME" \
     --endpoint-url "$R2_ENDPOINT" \
-    --region auto
+    --region auto 2>&1; then
+    echo "Upload failed - check credentials and endpoint URL"
+    exit 1
+fi
 
 echo "Backup completed successfully: $TIMESTAMP/$ARCHIVE_NAME"
