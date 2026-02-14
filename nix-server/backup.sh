@@ -21,6 +21,10 @@ if [ -z "$R2_ACCESS_KEY_ID" ] || [ -z "$R2_SECRET_ACCESS_KEY" ] || [ -z "$R2_BUC
     exit 1
 fi
 
+# Export AWS credentials for AWS CLI
+export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
+
 # Generate timestamp
 TIMESTAMP=$(date +%s)
 echo "Starting backup with timestamp: $TIMESTAMP"
