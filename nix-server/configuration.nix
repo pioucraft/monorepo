@@ -240,9 +240,10 @@ in
                 serviceConfig = {
                     Type = "oneshot";
                     RemainAfterExit = true;
-                    EnvironmentFile = "/etc/mullvad/creds";
                     ExecStart = pkgs.writeShellScript "mullvad-login" ''
                         set -e
+                        # Source the credentials file
+                        source /etc/mullvad/creds
                         # Wait for daemon socket to be ready
                         for i in $(seq 1 30); do
                             if ${pkgs.mullvad}/bin/mullvad status &>/dev/null; then
@@ -251,7 +252,7 @@ in
                             echo "Waiting for Mullvad daemon... ($i/30)"
                             sleep 1
                         done
-                        # Login with account number from environment
+                        # Login with account number
                         ${pkgs.mullvad}/bin/mullvad account login "''${MULLVAD_ACCOUNT_NUMBER}"
                     '';
                 };
