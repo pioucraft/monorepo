@@ -137,6 +137,7 @@ in
         vim
         git
         fastfetch
+        awscli2
     ];
 
     # Journal app
@@ -150,6 +151,25 @@ in
             EnvironmentFile = "/home/nix/git/monorepo/server-software/.env";
             Restart = "always";
             User = "nix";
+        };
+    };
+
+    # Data backup to Cloudflare R2
+    systemd.services.data-backup = {
+        description = "Backup data to Cloudflare R2";
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "/home/nix/git/monorepo/nix-server/backup.sh";
+            User = "nix";
+        };
+    };
+
+    systemd.timers.data-backup = {
+        description = "Run data backup every 12 hours";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "*-*-* 00,12:00:00";
+            Persistent = true;
         };
     };
 
