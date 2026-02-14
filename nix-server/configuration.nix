@@ -209,7 +209,78 @@ in
         };
     };
 
-
+    # WireGuard VPN Container
+    containers.wireguard = {
+        autoStart = true;
+        
+        allowedDevices = [
+            { node = "/dev/net/tun"; modifier = "rwm"; }
+        ];
+        
+        additionalCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" ];
+        
+        bindMounts = {
+            "/etc/wireguard/wg0.conf" = {
+                hostPath = "/home/nix/git/monorepo/nix-server/wireguard.conf";
+                isReadOnly = true;
+            };
+        };
+        
+        config = { config, pkgs, ... }: {
+            system.stateVersion = "25.05";
+            
+            # Enable WireGuard kernel module support
+            boot.kernelModules = [ "wireguard" ];
+            
+            # Install WireGuard tools
+            environment.systemPackages = with pkgs; [
+                wireguard-tools
+                curl
+                yt-dlp
+            ];
+            
+            # Set up WireGuard interface
+            networking.wireguard.interfaces = {
+                wg0 = {
+                    configFile = "/etc/wireguard/wg0.conf";
+                    # Route all traffic through VPN
+                    postSetup = ''
+                        ${pkgs.iproute2}/bin/ip route add default dev wg0 table 51820
+                        ${pkgs.iproute2}/bin/ip rule add from all table 51820 priority 100
+                    '';
+                    postShutdown = ''
+                        ${pkgs.iproute2}/bin/ip rule del table 51820 2>/dev/null || true
+                        ${pkgs.iproute2}/bin/ip route del default dev wg0 table 51820 2>/dev/null || true
+                    '';
+                };
+            };
+            
+            # Ensure DNS works through VPN
+            networking.nameservers = [ "10.64.0.1" ];
+            
+            # Wait for WireGuard to be ready before considering network up
+            systemd.services.wait-for-vpn = {
+                description = "Wait for WireGuard VPN";
+                after = [ "wireguard-wg0.service" "network.target" ];
+                requires = [ "wireguard-wg0.service" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = pkgs.writeShellScript "wait-for-vpn" ''
+                        for i in $(seq 1 30); do
+                            if ${pkgs.iproute2}/bin/ip link show wg0 &>/dev/null; then
+                                echo "WireGuard interface is up"
+                                break
+                            fi
+                            echo "Waiting for WireGuard... ($i/30)"
+                            sleep 1
+                        done
+                    '';
+                };
+            };
+        };
+    };
 
     # Caddy reverse proxy
     services.caddy = {

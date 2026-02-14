@@ -1,0 +1,16 @@
+# WireGuard VPN Configuration
+# Replace this with your actual WireGuard config from Mullvad or your VPN provider
+# 
+# Get this from: https://mullvad.net/en/account/wireguard-config
+# Or from your VPN provider's dashboard
+#
+# Example format:
+# [Interface]
+# PrivateKey = YOUR_PRIVATE_KEY_HERE
+# Address = 10.64.0.2/32
+# DNS = 10.64.0.1
+# 
+# [Peer]
+# PublicKey = SERVER_PUBLIC_KEY_HERE
+# AllowedIPs = 0.0.0.0/0,::/0
+# Endpoint = SERVER_IP:51820
