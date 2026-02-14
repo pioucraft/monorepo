@@ -147,7 +147,9 @@ in
         autoStart = true;
         config = { pkgs, ... }: {
             services.mullvad-vpn.enable = true;
-            environment.systemPackages = [ pkgs.yt-dlp ];
+            environment.systemPackages = [ pkgs.mullvad pkgs.yt-dlp ];
+            boot.kernelModules = [ "tun" ]; 
+
             # Ensure DNS and networking are isolated
             networking.useHostResolvConf = false;
             services.resolved.enable = true;
