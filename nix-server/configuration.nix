@@ -237,20 +237,37 @@ in
                 wireguard-tools
                 curl
                 yt-dlp
+                iproute2
+                gnugrep
             ];
             
-            # Set up WireGuard interface
-            networking.wireguard.interfaces = {
-                wg0 = {
-                    configFile = "/etc/wireguard/wg0.conf";
-                    # Route all traffic through VPN
-                    postSetup = ''
+            # Set up WireGuard interface using systemd service
+            systemd.services.wireguard-setup = {
+                description = "Setup WireGuard VPN";
+                after = [ "network.target" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = pkgs.writeShellScript "wireguard-up" ''
+                        set -e
+                        # Create WireGuard interface
+                        ${pkgs.iproute2}/bin/ip link add wg0 type wireguard 2>/dev/null || true
+                        # Load configuration
+                        ${pkgs.wireguard-tools}/bin/wg setconf wg0 /etc/wireguard/wg0.conf
+                        # Bring up interface
+                        ${pkgs.iproute2}/bin/ip link set wg0 up
+                        # Add IP address (parse from config)
+                        address=$(${pkgs.gnugrep}/bin/grep -E '^Address' /etc/wireguard/wg0.conf | ${pkgs.gnugrep}/bin/grep -oE '[0-9.]+/[0-9]+')
+                        ${pkgs.iproute2}/bin/ip addr add $address dev wg0
+                        # Route all traffic through VPN
                         ${pkgs.iproute2}/bin/ip route add default dev wg0 table 51820
                         ${pkgs.iproute2}/bin/ip rule add from all table 51820 priority 100
                     '';
-                    postShutdown = ''
+                    ExecStop = pkgs.writeShellScript "wireguard-down" ''
                         ${pkgs.iproute2}/bin/ip rule del table 51820 2>/dev/null || true
                         ${pkgs.iproute2}/bin/ip route del default dev wg0 table 51820 2>/dev/null || true
+                        ${pkgs.iproute2}/bin/ip link del wg0 2>/dev/null || true
                     '';
                 };
             };
@@ -261,8 +278,8 @@ in
             # Wait for WireGuard to be ready before considering network up
             systemd.services.wait-for-vpn = {
                 description = "Wait for WireGuard VPN";
-                after = [ "wireguard-wg0.service" "network.target" ];
-                requires = [ "wireguard-wg0.service" ];
+                after = [ "wireguard-setup.service" "network.target" ];
+                requires = [ "wireguard-setup.service" ];
                 wantedBy = [ "multi-user.target" ];
                 serviceConfig = {
                     Type = "oneshot";
