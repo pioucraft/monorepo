@@ -245,11 +245,24 @@ in
                 };
             };
             
+            # Connect to Mullvad VPN
+            systemd.services.mullvad-connect = {
+                description = "Connect to Mullvad VPN";
+                after = [ "mullvad-login.service" ];
+                requires = [ "mullvad-login.service" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = "${pkgs.mullvad}/bin/mullvad connect";
+                };
+            };
+            
             # Enable kill switch to block traffic when VPN disconnects
             systemd.services.mullvad-killswitch = {
                 description = "Enable Mullvad kill switch";
-                after = [ "mullvad-login.service" ];
-                requires = [ "mullvad-login.service" ];
+                after = [ "mullvad-connect.service" ];
+                requires = [ "mullvad-connect.service" ];
                 wantedBy = [ "multi-user.target" ];
                 serviceConfig = {
                     Type = "oneshot";
