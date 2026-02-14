@@ -138,6 +138,7 @@ in
         git
         fastfetch
         awscli2
+        gnutar
     ];
 
     # Journal app
