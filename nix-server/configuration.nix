@@ -158,7 +158,7 @@ in
     # Data backup to Cloudflare R2
     systemd.services.data-backup = {
         description = "Backup data to Cloudflare R2";
-        path = with pkgs; [ gnutar awscli2 ];
+        path = with pkgs; [ gnutar gzip awscli2 ];
         serviceConfig = {
             Type = "oneshot";
             ExecStart = "/home/nix/git/monorepo/nix-server/backup.sh";
