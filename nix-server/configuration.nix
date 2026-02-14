@@ -209,84 +209,6 @@ in
         };
     };
 
-    # WireGuard VPN Container
-    containers.wireguard = {
-        autoStart = true;
-        privateNetwork = true;
-        hostAddress = "192.168.100.10";
-        localAddress = "192.168.100.11";
-        
-        allowedDevices = [
-            { node = "/dev/net/tun"; modifier = "rwm"; }
-        ];
-        
-        additionalCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" ];
-        
-        bindMounts = {
-            "/etc/wireguard/wg0.conf" = {
-                hostPath = "/home/nix/git/monorepo/nix-server/wireguard.conf";
-                isReadOnly = true;
-            };
-        };
-        
-        config = { config, pkgs, ... }: {
-            system.stateVersion = "25.05";
-            
-            # Enable WireGuard kernel module support
-            boot.kernelModules = [ "wireguard" ];
-            
-            # Install WireGuard tools
-            environment.systemPackages = with pkgs; [
-                wireguard-tools
-                curl
-                yt-dlp
-            ];
-
-            # Enable systemd-resolved so wg-quick can set DNS
-            services.resolved.enable = true;
-            networking.useHostResolvConf = false;
-
-            # Ensure DNS works through VPN
-            networking.nameservers = [ "10.64.0.1" ];
-
-            # Set up WireGuard interface using wg-quick
-            systemd.services.wireguard-setup = {
-                description = "Setup WireGuard VPN";
-                after = [ "network-online.target" ];
-                wants = [ "network-online.target" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    ExecStart = "${pkgs.wireguard-tools}/bin/wg-quick up /etc/wireguard/wg0.conf";
-                    ExecStop = "${pkgs.wireguard-tools}/bin/wg-quick down /etc/wireguard/wg0.conf";
-                };
-            };
-            
-            # Wait for WireGuard to be ready before considering network up
-            systemd.services.wait-for-vpn = {
-                description = "Wait for WireGuard VPN";
-                after = [ "wireguard-setup.service" "network-online.target" ];
-                requires = [ "wireguard-setup.service" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    ExecStart = pkgs.writeShellScript "wait-for-vpn" ''
-                        for i in $(seq 1 30); do
-                            if ${pkgs.wireguard-tools}/bin/wg show wg0 &>/dev/null; then
-                                echo "WireGuard interface is up"
-                                break
-                            fi
-                            echo "Waiting for WireGuard... ($i/30)"
-                            sleep 1
-                        done
-                    '';
-                };
-            };
-        };
-    };
-
     # Caddy reverse proxy
     services.caddy = {
         enable = true;
@@ -306,11 +228,6 @@ in
 
     networking.firewall = {
         allowedTCPPorts = [ 80 443 22 ];
-        extraCommands = ''
-          iptables -t nat -A POSTROUTING -s 192.168.100.0/24 -j MASQUERADE
-          iptables -A FORWARD -s 192.168.100.0/24 -j ACCEPT
-          iptables -A FORWARD -d 192.168.100.0/24 -m state --state RELATED,ESTABLISHED -j ACCEPT
-        '';
     };
 
     system.stateVersion = "25.05";
