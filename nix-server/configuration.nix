@@ -241,7 +241,19 @@ in
                     Type = "oneshot";
                     RemainAfterExit = true;
                     EnvironmentFile = "/etc/mullvad/creds";
-                    ExecStart = "${pkgs.mullvad}/bin/mullvad account login \$MULLVAD_ACCOUNT_NUMBER";
+                    ExecStart = pkgs.writeShellScript "mullvad-login" ''
+                        set -e
+                        # Wait for daemon socket to be ready
+                        for i in $(seq 1 30); do
+                            if ${pkgs.mullvad}/bin/mullvad status &>/dev/null; then
+                                break
+                            fi
+                            echo "Waiting for Mullvad daemon... ($i/30)"
+                            sleep 1
+                        done
+                        # Login with account number from environment
+                        ${pkgs.mullvad}/bin/mullvad account login "''${MULLVAD_ACCOUNT_NUMBER}"
+                    '';
                 };
             };
             
