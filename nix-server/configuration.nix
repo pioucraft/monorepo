@@ -244,6 +244,7 @@ in
 
             # Enable systemd-resolved so wg-quick can set DNS
             services.resolved.enable = true;
+            networking.useHostResolvConf = false;
 
             # Ensure DNS works through VPN
             networking.nameservers = [ "10.64.0.1" ];
