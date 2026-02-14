@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DATA_DIR="/home/nix/git/monorepo/data"
 ENV_FILE="$SCRIPT_DIR/.env"
 
@@ -12,7 +12,7 @@ fi
 
 # Load environment variables
 set -a
-source "$ENV_FILE"
+. "$ENV_FILE"
 set +a
 
 # Check required variables
