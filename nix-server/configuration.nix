@@ -209,38 +209,7 @@ in
         };
     };
 
-    # Mullvad VPN
-    services.mullvad-vpn = {
-        enable = true;
-        package = pkgs.mullvad;
-    };
 
-    # Auto-login and connect to Mullvad
-    systemd.services.mullvad-setup = {
-        description = "Auto-setup Mullvad VPN";
-        after = [ "mullvad-daemon.service" "network-online.target" ];
-        requires = [ "mullvad-daemon.service" "network-online.target" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
-            ExecStart = pkgs.writeShellScript "mullvad-setup" ''
-                set -e
-                # Wait for daemon
-                for i in $(seq 1 30); do
-                    if ${pkgs.mullvad}/bin/mullvad status &>/dev/null; then
-                        break
-                    fi
-                    sleep 1
-                done
-                # Login and connect
-                ${pkgs.mullvad}/bin/mullvad account login "''${MULLVAD_ACCOUNT_NUMBER}"
-                ${pkgs.mullvad}/bin/mullvad relay set location any
-                ${pkgs.mullvad}/bin/mullvad connect
-            '';
-        };
-    };
 
     # Caddy reverse proxy
     services.caddy = {
