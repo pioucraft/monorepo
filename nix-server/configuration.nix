@@ -142,6 +142,17 @@ in
         curl
     ];
 
+    containers.mullvad-box = {
+        autoStart = true;
+        config = { pkgs, ... }: {
+            services.mullvad-vpn.enable = true;
+            environment.systemPackages = [ pkgs.yt-dlp ];
+            # Ensure DNS and networking are isolated
+            networking.useHostResolvConf = false;
+            services.resolved.enable = true;
+        };
+    };
+
     # Journal app
     systemd.services.server-software = {
         description = "Journal Server";
