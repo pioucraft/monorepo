@@ -209,6 +209,61 @@ in
         };
     };
 
+    # Mullvad VPN Container
+    containers.mullvad = {
+        autoStart = true;
+        privateNetwork = true;
+        hostAddress = "192.168.100.10";
+        localAddress = "192.168.100.11";
+        
+        bindMounts = {
+            "/etc/mullvad/creds" = {
+                hostPath = "/home/nix/git/monorepo/nix-server/.env";
+                isReadOnly = true;
+            };
+        };
+        
+        config = { config, pkgs, ... }: {
+            system.stateVersion = "25.05";
+            
+            services.mullvad-vpn = {
+                enable = true;
+                package = pkgs.mullvad;
+            };
+            
+            # Login to Mullvad account after daemon starts
+            systemd.services.mullvad-login = {
+                description = "Login to Mullvad VPN";
+                after = [ "mullvad-daemon.service" ];
+                requires = [ "mullvad-daemon.service" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    EnvironmentFile = "/etc/mullvad/creds";
+                    ExecStart = "${pkgs.mullvad}/bin/mullvad account login \$MULLVAD_ACCOUNT_NUMBER";
+                };
+            };
+            
+            # Enable kill switch to block traffic when VPN disconnects
+            systemd.services.mullvad-killswitch = {
+                description = "Enable Mullvad kill switch";
+                after = [ "mullvad-login.service" ];
+                requires = [ "mullvad-login.service" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = "${pkgs.mullvad}/bin/mullvad lockdown-mode set on";
+                };
+            };
+            
+            environment.systemPackages = with pkgs; [
+                mullvad
+            ];
+        };
+    };
+
     # Caddy reverse proxy
     services.caddy = {
         enable = true;
