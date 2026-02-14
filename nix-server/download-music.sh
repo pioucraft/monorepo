@@ -8,10 +8,18 @@ fi
 
 URL="$1"
 MUSIC_DIR="/home/nix/git/monorepo/data/music"
+NIX_GROUP="$(id -gn nix 2>/dev/null || true)"
 
-if ! install -d -m 0755 -o nix -g nix "$MUSIC_DIR"; then
-    echo "Failed to create $MUSIC_DIR with nix ownership"
-    exit 1
+if [ -n "$NIX_GROUP" ]; then
+    if ! install -d -m 0755 -o nix -g "$NIX_GROUP" "$MUSIC_DIR"; then
+        echo "Failed to create $MUSIC_DIR with nix ownership"
+        exit 1
+    fi
+else
+    if ! install -d -m 0755 -o nix "$MUSIC_DIR"; then
+        echo "Failed to create $MUSIC_DIR with nix ownership"
+        exit 1
+    fi
 fi
 
 machinectl shell wireguard /bin/sh -c "yt-dlp -x --audio-format mp3 --audio-quality 0 \
