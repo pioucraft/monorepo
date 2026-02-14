@@ -200,6 +200,10 @@ in
         };
     };
 
+    systemd.tmpfiles.rules = [
+        "d /home/nix/git/monorepo/data/music 0755 nix nix -"
+    ];
+
     services.navidrome = {
         enable = true;
         settings = {
@@ -227,6 +231,14 @@ in
                 hostPath = "/home/nix/git/monorepo/nix-server/wireguard.conf";
                 isReadOnly = true;
             };
+            "/home/nix/git/monorepo/nix-server" = {
+                hostPath = "/home/nix/git/monorepo/nix-server";
+                isReadOnly = true;
+            };
+            "/home/nix/git/monorepo/data/music" = {
+                hostPath = "/home/nix/git/monorepo/data/music";
+                isReadOnly = false;
+            };
         };
         
         config = { config, pkgs, ... }: {
@@ -240,6 +252,7 @@ in
                 wireguard-tools
                 curl
                 yt-dlp
+                python3
             ];
 
             # Enable systemd-resolved so wg-quick can set DNS
@@ -248,6 +261,12 @@ in
 
             # Ensure DNS works through VPN
             networking.nameservers = [ "10.64.0.1" ];
+
+            users.users.nix = {
+                isNormalUser = true;
+                home = "/home/nix";
+                createHome = true;
+            };
 
             # Set up WireGuard interface using wg-quick
             systemd.services.wireguard-setup = {
@@ -282,6 +301,20 @@ in
                             sleep 1
                         done
                     '';
+                };
+            };
+
+            systemd.services.telegram-music-bot = {
+                description = "Telegram YouTube Music downloader";
+                after = [ "wait-for-vpn.service" "network-online.target" ];
+                requires = [ "wait-for-vpn.service" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    ExecStart = "${pkgs.python3}/bin/python /home/nix/git/monorepo/nix-server/telegram-music-bot.py";
+                    EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
+                    Restart = "always";
+                    RestartSec = 5;
+                    User = "nix";
                 };
             };
         };
