@@ -225,8 +225,8 @@ in
             { node = "/dev/net/tun"; modifier = "rwm"; }
         ];
         
-        # Add network capabilities for VPN
-        extraFlags = [ "--cap-add=NET_ADMIN" "--cap-add=NET_RAW" ];
+        # Add capabilities for VPN (NET_ADMIN for network interface management)
+        additionalCapabilities = [ "CAP_NET_ADMIN" "CAP_NET_RAW" ];
         
         config = { config, pkgs, ... }: {
             system.stateVersion = "25.05";
