@@ -142,6 +142,7 @@ in
         curl
     ];
 
+    # here we still need to setup the mullvad auth and manually set the settings for connecting to the VPN and stuff
     containers.mullvad-box = {
         autoStart = true;
         config = { pkgs, ... }: {
