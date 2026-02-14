@@ -154,6 +154,11 @@ in
             networking.useHostResolvConf = false;
             services.resolved.enable = true;
         };
+        additionalCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_MODULE" ];
+        allowedDevices = [
+            { node = "/dev/net/tun"; modifier = "rw"; }
+        ];
+
     };
 
     # Journal app
