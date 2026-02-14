@@ -212,6 +212,9 @@ in
     # WireGuard VPN Container
     containers.wireguard = {
         autoStart = true;
+        privateNetwork = true;
+        hostAddress = "192.168.100.10";
+        localAddress = "192.168.100.11";
         
         allowedDevices = [
             { node = "/dev/net/tun"; modifier = "rwm"; }
@@ -237,48 +240,29 @@ in
                 wireguard-tools
                 curl
                 yt-dlp
-                iproute2
-                gnugrep
             ];
-            
-            # Set up WireGuard interface using systemd service
-            systemd.services.wireguard-setup = {
-                description = "Setup WireGuard VPN";
-                after = [ "network.target" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    ExecStart = pkgs.writeShellScript "wireguard-up" ''
-                        set -e
-                        # Create WireGuard interface
-                        ${pkgs.iproute2}/bin/ip link add wg0 type wireguard 2>/dev/null || true
-                        # Load configuration
-                        ${pkgs.wireguard-tools}/bin/wg setconf wg0 /etc/wireguard/wg0.conf
-                        # Bring up interface
-                        ${pkgs.iproute2}/bin/ip link set wg0 up
-                        # Add IP address (parse from config)
-                        address=$(${pkgs.gnugrep}/bin/grep -E '^Address' /etc/wireguard/wg0.conf | ${pkgs.gnugrep}/bin/grep -oE '[0-9.]+/[0-9]+')
-                        ${pkgs.iproute2}/bin/ip addr add $address dev wg0
-                        # Route all traffic through VPN
-                        ${pkgs.iproute2}/bin/ip route add default dev wg0 table 51820
-                        ${pkgs.iproute2}/bin/ip rule add from all table 51820 priority 100
-                    '';
-                    ExecStop = pkgs.writeShellScript "wireguard-down" ''
-                        ${pkgs.iproute2}/bin/ip rule del table 51820 2>/dev/null || true
-                        ${pkgs.iproute2}/bin/ip route del default dev wg0 table 51820 2>/dev/null || true
-                        ${pkgs.iproute2}/bin/ip link del wg0 2>/dev/null || true
-                    '';
-                };
-            };
             
             # Ensure DNS works through VPN
             networking.nameservers = [ "10.64.0.1" ];
             
+            # Set up WireGuard interface using wg-quick
+            systemd.services.wireguard-setup = {
+                description = "Setup WireGuard VPN";
+                after = [ "network-online.target" ];
+                wants = [ "network-online.target" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = "${pkgs.wireguard-tools}/bin/wg-quick up /etc/wireguard/wg0.conf";
+                    ExecStop = "${pkgs.wireguard-tools}/bin/wg-quick down /etc/wireguard/wg0.conf";
+                };
+            };
+            
             # Wait for WireGuard to be ready before considering network up
             systemd.services.wait-for-vpn = {
                 description = "Wait for WireGuard VPN";
-                after = [ "wireguard-setup.service" "network.target" ];
+                after = [ "wireguard-setup.service" "network-online.target" ];
                 requires = [ "wireguard-setup.service" ];
                 wantedBy = [ "multi-user.target" ];
                 serviceConfig = {
@@ -286,7 +270,7 @@ in
                     RemainAfterExit = true;
                     ExecStart = pkgs.writeShellScript "wait-for-vpn" ''
                         for i in $(seq 1 30); do
-                            if ${pkgs.iproute2}/bin/ip link show wg0 &>/dev/null; then
+                            if ${pkgs.wireguard-tools}/bin/wg show wg0 &>/dev/null; then
                                 echo "WireGuard interface is up"
                                 break
                             fi
@@ -314,7 +298,16 @@ in
         };
     };
 
-    networking.firewall.allowedTCPPorts = [ 80 443 22 ];
+    boot.kernel.sysctl."net.ipv4.ip_forward" = true;
+
+    networking.firewall = {
+        allowedTCPPorts = [ 80 443 22 ];
+        extraCommands = ''
+          iptables -t nat -A POSTROUTING -s 192.168.100.0/24 -j MASQUERADE
+          iptables -A FORWARD -s 192.168.100.0/24 -j ACCEPT
+          iptables -A FORWARD -d 192.168.100.0/24 -m state --state RELATED,ESTABLISHED -j ACCEPT
+        '';
+    };
 
     system.stateVersion = "25.05";
 }
