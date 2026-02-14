@@ -220,8 +220,22 @@ in
             };
         };
         
+        # Allow container to manage network interfaces and firewall
+        allowedDevices = [
+            { node = "/dev/net/tun"; modifier = "rwm"; }
+        ];
+        
+        # Add network capabilities for VPN
+        extraFlags = [ "--cap-add=NET_ADMIN" "--cap-add=NET_RAW" ];
+        
         config = { config, pkgs, ... }: {
             system.stateVersion = "25.05";
+            
+            # Create tun device for VPN
+            boot.kernelModules = [ "tun" ];
+            
+            # Ensure iptables is available
+            networking.firewall.enable = true;
             
             services.mullvad-vpn = {
                 enable = true;
@@ -255,7 +269,7 @@ in
                 };
             };
             
-            # Connect to Mullvad VPN
+            # Set relay location and connect to Mullvad VPN
             systemd.services.mullvad-connect = {
                 description = "Connect to Mullvad VPN";
                 after = [ "mullvad-login.service" ];
@@ -266,6 +280,8 @@ in
                     RemainAfterExit = true;
                     ExecStart = pkgs.writeShellScript "mullvad-connect" ''
                         set -e
+                        # Set relay to auto (or specify a country like 'se' for Sweden)
+                        ${pkgs.mullvad}/bin/mullvad relay set location any
                         # Connect to VPN
                         ${pkgs.mullvad}/bin/mullvad connect
                         # Wait for connection
@@ -297,6 +313,7 @@ in
             
             environment.systemPackages = with pkgs; [
                 mullvad
+                iptables
             ];
         };
     };
