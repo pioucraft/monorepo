@@ -142,25 +142,6 @@ in
         curl
     ];
 
-    # here we still need to setup the mullvad auth and manually set the settings for connecting to the VPN and stuff
-    containers.mullvad-box = {
-        autoStart = true;
-        config = { pkgs, ... }: {
-            services.mullvad-vpn.enable = true;
-            environment.systemPackages = [ pkgs.mullvad pkgs.yt-dlp ];
-            boot.kernelModules = [ "tun" ]; 
-
-            # Ensure DNS and networking are isolated
-            networking.useHostResolvConf = false;
-            services.resolved.enable = true;
-        };
-        additionalCapabilities = [ "CAP_NET_ADMIN" "CAP_SYS_MODULE" ];
-        allowedDevices = [
-            { node = "/dev/net/tun"; modifier = "rw"; }
-        ];
-
-    };
-
     # Journal app
     systemd.services.server-software = {
         description = "Journal Server";
