@@ -62,19 +62,32 @@ def yt_dlp_command(url):
 def run_download(url, chat_id):
     os.makedirs(MUSIC_DIR, exist_ok=True)
     send_message(chat_id, "Starting download…")
-    process = subprocess.run(
+    process = subprocess.Popen(
         yt_dlp_command(url),
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        check=False,
     )
+    last_update = time.monotonic()
+    output_tail = []
+
+    if process.stdout:
+        for line in process.stdout:
+            cleaned = line.strip()
+            if cleaned:
+                output_tail.append(cleaned)
+                if len(output_tail) > 6:
+                    output_tail.pop(0)
+            if cleaned and time.monotonic() - last_update > 45:
+                send_message(chat_id, f"Still downloading…\n{cleaned}")
+                last_update = time.monotonic()
+
+    process.wait()
     if process.returncode == 0:
         send_message(chat_id, "Download finished.")
         return
 
-    output = (process.stdout or "").strip()
-    tail = "\n".join(output.splitlines()[-6:]) if output else "(no output)"
+    tail = "\n".join(output_tail) if output_tail else "(no output)"
     send_message(chat_id, f"Download failed:\n{tail}")
 
 

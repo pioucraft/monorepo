@@ -201,6 +201,7 @@ in
     };
 
     systemd.tmpfiles.rules = [
+        "d /home/nix/git/monorepo/data 0755 nix nix -"
         "d /home/nix/git/monorepo/data/music 0755 nix nix -"
     ];
 
@@ -253,6 +254,7 @@ in
                 curl
                 yt-dlp
                 python3
+                ffmpeg
             ];
 
             # Enable systemd-resolved so wg-quick can set DNS
