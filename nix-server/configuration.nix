@@ -241,10 +241,13 @@ in
                 curl
                 yt-dlp
             ];
-            
+
+            # Enable systemd-resolved so wg-quick can set DNS
+            services.resolved.enable = true;
+
             # Ensure DNS works through VPN
             networking.nameservers = [ "10.64.0.1" ];
-            
+
             # Set up WireGuard interface using wg-quick
             systemd.services.wireguard-setup = {
                 description = "Setup WireGuard VPN";
