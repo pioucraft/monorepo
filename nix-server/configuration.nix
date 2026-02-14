@@ -139,6 +139,7 @@ in
         fastfetch
         awscli2
         gnutar
+        curl
     ];
 
     # Journal app
@@ -162,6 +163,30 @@ in
         serviceConfig = {
             Type = "oneshot";
             ExecStart = "/home/nix/git/monorepo/nix-server/backup.sh";
+            User = "nix";
+        };
+        unitConfig = {
+            OnSuccess = "data-backup-notify-success.service";
+            OnFailure = "data-backup-notify-failure.service";
+        };
+    };
+
+    systemd.services.data-backup-notify-success = {
+        description = "Notify Telegram of successful backup";
+        path = with pkgs; [ curl ];
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "/home/nix/git/monorepo/nix-server/telegram-notify.sh '✅ Backup completed successfully at %H:%M:%S on %Y-%m-%d'";
+            User = "nix";
+        };
+    };
+
+    systemd.services.data-backup-notify-failure = {
+        description = "Notify Telegram of failed backup";
+        path = with pkgs; [ curl ];
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = "/home/nix/git/monorepo/nix-server/telegram-notify.sh '❌ Backup failed at %H:%M:%S on %Y-%m-%d'";
             User = "nix";
         };
     };
