@@ -8,6 +8,8 @@
 		type JournalEntry,
 		type Revision
 	} from '$lib/journal.svelte';
+	import { auth } from '$lib/auth.svelte';
+
 	import { onMount } from 'svelte';
 	import PencilSquare from '$lib/icons/PencilSquare.svelte';
 	import Clock from '$lib/icons/Clock.svelte';
@@ -21,6 +23,9 @@
 	let historyIndex: number | null = $state(null);
 	let search = $state('');
 	let showHidden = $state(false);
+	let showHiddenPasswordPrompt = $state(false);
+	let passwordForHidden = $state('');
+	let hiddenAuthError = $state('');
 	let actionModalIndex: number | null = $state(null);
 
 	let pinnedTags = ['#readinglist'];
@@ -158,13 +163,79 @@
 	onMount(loadEntries);
 </script>
 
+{#if showHiddenPasswordPrompt}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+		<form
+			class="w-full max-w-xs rounded bg-white p-6 shadow dark:bg-black"
+			onsubmit={async (e) => {
+				e.preventDefault();
+				hiddenAuthError = '';
+				if (!passwordForHidden.trim()) {
+					hiddenAuthError = 'Password required';
+					return;
+				}
+				// Hash password
+				const encoded = new TextEncoder().encode(passwordForHidden);
+				const buffer = await crypto.subtle.digest('SHA-256', encoded);
+				const hash = Array.from(new Uint8Array(buffer))
+					.map((b) => b.toString(16).padStart(2, '0'))
+					.join('');
+				if (hash !== auth.hashedPassword) {
+					hiddenAuthError = 'Incorrect password';
+					return;
+				}
+				showHiddenPasswordPrompt = false;
+				passwordForHidden = '';
+				showHidden = true;
+			}}
+		>
+			<h2 class="mb-2 text-center text-lg font-bold text-black dark:text-white">
+				Authenticate to show hidden notes
+			</h2>
+			<input
+				type="password"
+				placeholder="Password"
+				bind:value={passwordForHidden}
+				class="mb-2 w-full border border-black bg-transparent px-3 py-2 text-sm text-black placeholder-neutral-400 focus:outline-none dark:border-white dark:text-white dark:placeholder-neutral-600"
+				autofocus
+			/>
+			{#if hiddenAuthError}
+				<p class="mb-2 text-xs text-red-500">{hiddenAuthError}</p>
+			{/if}
+			<div class="flex gap-2">
+				<button
+					type="submit"
+					class="flex-1 cursor-pointer bg-black py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+				>
+					Unlock
+				</button>
+				<button
+					type="button"
+					onclick={() => {
+						showHiddenPasswordPrompt = false;
+						passwordForHidden = '';
+					}}
+					class="flex-1 cursor-pointer border border-black py-2 text-sm font-medium text-black dark:border-white dark:text-white"
+				>
+					Cancel
+				</button>
+			</div>
+		</form>
+	</div>
+{/if}
 <div class="min-h-screen bg-white p-8 dark:bg-black">
 	<div class="mx-auto max-w-lg">
 		<div class="mb-6 flex items-center justify-between">
 			<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
 			<div class="flex items-center gap-4">
 				<button
-					onclick={() => (showHidden = !showHidden)}
+					onclick={() => {
+						if (!showHidden) {
+							showHiddenPasswordPrompt = true;
+						} else {
+							showHidden = false;
+						}
+					}}
 					class="cursor-pointer border border-black px-3 py-1 text-xs font-medium text-black dark:border-white dark:text-white"
 				>
 					{showHidden ? 'Hide hidden' : 'Show hidden'}
