@@ -12,7 +12,7 @@ mkdir -p $MUSIC_DIR && sudo chown -R nix $MUSIC_DIR
 
 
 sudo nixos-container run wireguard -- /bin/sh -c "yt-dlp -x --audio-format mp3 --audio-quality 0 \
-    --embed-metadata --embed-thumbnail \
+    --embed-metadata --embed-thumbnail --embed-lyrics --write-lyrics \
     --parse-metadata 'playlist_index:%(track_number)s' \
     --convert-thumbnails jpg \
     --ppa \"EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf \\\"crop='if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\"\" \
