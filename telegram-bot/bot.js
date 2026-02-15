@@ -29,6 +29,23 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function sendMessage(apiBase, chatId, text) {
+  const sendUrl = new URL(`${apiBase}/sendMessage`);
+  sendUrl.searchParams.set("chat_id", String(chatId));
+  sendUrl.searchParams.set("text", text);
+  await fetch(sendUrl);
+}
+
+async function runDownload(url) {
+  const process = Bun.spawn([
+    "sh",
+    "/home/nix/git/monorepo/nix-server/download-music.sh",
+    url,
+  ]);
+  const exitCode = await process.exited;
+  return exitCode === 0;
+}
+
 async function main() {
   const fileEnv = await loadEnv();
   const token = process.env.TELEGRAM_BOT_TOKEN || fileEnv.TELEGRAM_BOT_TOKEN;
@@ -60,11 +77,30 @@ async function main() {
         const message = update.message;
         const text = message?.text?.trim();
 
+        if (!message || !text) {
+          continue;
+        }
+
         if (text === "Hello") {
-          const sendUrl = new URL(`${apiBase}/sendMessage`);
-          sendUrl.searchParams.set("chat_id", String(message.chat.id));
-          sendUrl.searchParams.set("text", "Hi !");
-          await fetch(sendUrl);
+          await sendMessage(apiBase, message.chat.id, "Hi !");
+          continue;
+        }
+
+        const downloadMatch = text.match(/^\/download(?:@\w+)?\s+(.+)$/i);
+        if (downloadMatch) {
+          const url = downloadMatch[1].trim();
+          if (!url) {
+            await sendMessage(apiBase, message.chat.id, "Usage: /download <url>");
+            continue;
+          }
+
+          await sendMessage(apiBase, message.chat.id, "Starting download...");
+          const success = await runDownload(url);
+          await sendMessage(
+            apiBase,
+            message.chat.id,
+            success ? "Download complete." : "Download failed."
+          );
         }
       }
     } catch (error) {
