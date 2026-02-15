@@ -286,7 +286,7 @@ system.stateVersion = "25.05";
             networking.useHostResolvConf = false;
 
             # Ensure DNS works through VPN
-            networking.nameservers = [ "10.64.0.1" ];
+            networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
             # Set up WireGuard interface using wg-quick
             systemd.services.wireguard-setup = {
