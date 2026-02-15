@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz";
@@ -208,7 +208,7 @@ in
             MusicFolder = "/home/nix/git/monorepo/data/music";
         };
     };
-    systemd.services.navidrome.serviceConfig.ProtectHome = "read-only";
+    systemd.services.navidrome.serviceConfig.ProtectHome = lib.mkForce "read-only";
 
     # WireGuard VPN Container
     containers.wireguard = {
