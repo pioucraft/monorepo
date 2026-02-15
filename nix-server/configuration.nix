@@ -168,6 +168,8 @@ in
             Restart = "always";
             User = "nix";
             Environment = "PATH=/run/current-system/sw/bin:/bin:/usr/bin:/usr/local/bin";
+            NoNewPrivileges = lib.mkForce false;
+            RestrictSUIDSGID = lib.mkForce false;
         };
     };
 
