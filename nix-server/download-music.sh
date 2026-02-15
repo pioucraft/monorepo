@@ -19,5 +19,18 @@ nixos-container run wireguard -- /bin/sh -c "yt-dlp -x --audio-format mp3 --audi
     --cookies /home/nix/git/monorepo/nix-server/www.youtube.com_cookies.txt \
     -o '$MUSIC_DIR/%(artist)s %(album)s %(playlist_index)s - %(title)s.%(ext)s' \
     '$URL'"
-
 chown -R nix $MUSIC_DIR
+
+# Post-process MP3s: Set consistent Album Artist tag for Navidrome
+if ! command -v eyeD3 >/dev/null 2>&1; then
+    echo "Error: eyeD3 is required for metadata tagging! Please install it (e.g., via Nix or pip)."
+    exit 2
+fi
+
+for mp3 in "$MUSIC_DIR"/*.mp3; do
+    [ -e "$mp3" ] || continue  # skip if no files
+
+    echo "Tagging $mp3: blanking ARTIST tag."
+    eyeD3 --artist "" "$mp3"
+done
+

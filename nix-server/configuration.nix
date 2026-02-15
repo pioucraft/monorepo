@@ -140,6 +140,7 @@ in
         awscli2
         gnutar
         curl
+        eyeD3
     ];
 
     # Journal app
@@ -274,10 +275,11 @@ system.stateVersion = "25.05";
             
             # Install WireGuard tools
             environment.systemPackages = with pkgs; [
-                wireguard-tools
-                curl
-                yt-dlp
-            ];
+            wireguard-tools
+            curl
+            yt-dlp
+            eyeD3
+        ];
 
             # Enable systemd-resolved so wg-quick can set DNS
             services.resolved.enable = true;
