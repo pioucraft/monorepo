@@ -133,19 +133,11 @@ async function main() {
           }
 
            await sendMessage(apiBase, message.chat.id, "Starting download...");
-           // Capture and send output lines as Telegram messages
-           let lineBuffer = [];
-           const flushLines = async () => {
-             if (lineBuffer.length === 0) return;
-             const msg = lineBuffer.join("\n");
-             await sendMessage(apiBase, message.chat.id, msg);
-             lineBuffer = [];
-           };
+           // Run download, but do not forward output to Telegram
            const success = await runDownloadWithLiveOutput(url, async (line) => {
-             lineBuffer.push(line);
-             if (lineBuffer.length >= 8) await flushLines();
+             // Optionally log output locally...
+             console.log(line);
            });
-           await flushLines();
            await sendMessage(
              apiBase,
              message.chat.id,
