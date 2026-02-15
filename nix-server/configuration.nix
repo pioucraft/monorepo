@@ -179,6 +179,7 @@ in
             EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
             Restart = "always";
             User = "nix";
+            Environment = "PATH=/run/current-system/sw/bin:/bin:/usr/bin:/usr/local/bin";
         };
     };
 
