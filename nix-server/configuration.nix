@@ -31,11 +31,9 @@ in
 
     time.timeZone = "Europe/Zurich";
 
-    users.groups.containers = {};
-
     users.users.nix = {
         isNormalUser = true;
-        extraGroups = [ "networkmanager" "wheel" "containers" ];
+        extraGroups = [ "networkmanager" "wheel" ];
     };
 
     home-manager.users.nix = { pkgs, ... }: {
@@ -255,15 +253,6 @@ in
             system.stateVersion = "25.05";
 
             # Grant group containers access to ns paths so host user can nsenter
-            systemd.services.fix-namespaces = {
-              description = "Make /proc/1/ns/* accessible to containers group";
-              wantedBy = [ "multi-user.target" ];
-              after = [ "network.target" ];
-              serviceConfig = {
-                Type = "oneshot";
-                ExecStart = "/bin/sh -c 'chgrp containers /proc/1/ns/* && chmod g+r /proc/1/ns/*'";
-              };
-            };
 
             
             # Enable WireGuard kernel module support
@@ -348,4 +337,5 @@ in
     };
 
     system.stateVersion = "25.05";
+
 }
