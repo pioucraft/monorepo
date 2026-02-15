@@ -418,6 +418,7 @@ in
 
     programs.firefox.enable = true;
     programs.hyprland.enable = true;
+    services.mullvad-vpn.enable = true;
 
     environment.systemPackages = with pkgs; [
         vim
@@ -440,6 +441,7 @@ in
         bun
         opencode
         uv
+        mullvad-vpn
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
