@@ -39,7 +39,7 @@ async function sendMessage(apiBase, chatId, text) {
 async function runDownloadWithLiveOutput(url, onLine) {
   const proc = Bun.spawn([
     "sudo",
-    "./download-music.sh",
+    "/home/nix/git/monorepo/nix-server/download-music.sh",
     url,
   ], {
     stdout: "pipe",
