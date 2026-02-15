@@ -217,16 +217,6 @@ in
         };
     };
 
-    services.navidrome = {
-        enable = true;
-        settings = {
-            Address = "0.0.0.0"; # Or a specific IP
-            Port = 4533;
-            MusicFolder = "/home/nix/git/monorepo/data/music";
-        };
-    };
-    systemd.services.navidrome.serviceConfig.ProtectHome = lib.mkForce "read-only";
-
     # WireGuard VPN Container
     containers.wireguard = {
         autoStart = true;
@@ -330,11 +320,6 @@ services.resolved.enable = true;
         virtualHosts."home.gougoule.ch" = {
             extraConfig = ''
                 reverse_proxy localhost:3000
-            '';
-        };
-        virtualHosts."navidrome.gougoule.ch" = {
-            extraConfig = ''
-                reverse_proxy localhost:4533
             '';
         };
     };
