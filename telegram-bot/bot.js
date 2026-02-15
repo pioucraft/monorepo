@@ -116,7 +116,7 @@ async function main() {
          }
 
          if (text === "Hello") {
-           await sendMessage(apiBase, message.chat.id, "Hi !");
+           await sendMessage(apiBase, message.chat.id, "Hi, how are you ?");
            continue;
          }
 
