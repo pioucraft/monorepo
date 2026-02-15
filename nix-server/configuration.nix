@@ -166,7 +166,7 @@ in
             WorkingDirectory = "/home/nix/git/monorepo/telegram-bot";
             EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
             Restart = "always";
-            User = "nix";
+            User = "root";
             Environment = "PATH=/run/current-system/sw/bin:/bin:/usr/bin:/usr/local/bin";
 
         };
