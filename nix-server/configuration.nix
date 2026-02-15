@@ -227,6 +227,10 @@ in
                 hostPath = "/home/nix/git/monorepo/nix-server/wireguard.conf";
                 isReadOnly = true;
             };
+            "/home/nix/git/monorepo/" = {
+                hostPath = "/home/nix/git/monorepo/";
+                isReadOnly = false;
+            };
         };
         
         config = { config, pkgs, ... }: {
