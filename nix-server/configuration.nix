@@ -208,6 +208,7 @@ in
             MusicFolder = "/home/nix/git/monorepo/data/music";
         };
     };
+    systemd.services.navidrome.serviceConfig.ProtectHome = "read-only";
 
     # WireGuard VPN Container
     containers.wireguard = {
