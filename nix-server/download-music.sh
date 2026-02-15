@@ -14,7 +14,6 @@ mkdir -p $MUSIC_DIR && sudo chown -R nix $MUSIC_DIR
 sudo nixos-container run wireguard -- /bin/sh -c "yt-dlp -x --audio-format mp3 --audio-quality 0 \
     --embed-metadata --embed-thumbnail \
     --parse-metadata 'playlist_index:%(track_number)s' \
-    --parse-metadata 'release_year:%(meta_date)s' \
     --convert-thumbnails jpg \
     --ppa \"EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf \\\"crop='if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\"\" \
     --cookies /home/nix/git/monorepo/nix-server/www.youtube.com_cookies.txt \
