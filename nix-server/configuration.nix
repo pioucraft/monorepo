@@ -284,7 +284,7 @@ system.stateVersion = "25.05";
             # Enable systemd-resolved so wg-quick can set DNS
 services.resolved.enable = true;
     networking.useHostResolvConf = false;
-    networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
+    networking.nameservers = [ "10.64.0.1" ];
 
             # Set up WireGuard interface using wg-quick
             systemd.services.wireguard-setup = {
