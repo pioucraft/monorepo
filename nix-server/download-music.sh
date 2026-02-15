@@ -18,6 +18,6 @@ sudo nixos-container run wireguard -- /bin/sh -c "yt-dlp -x --audio-format mp3 -
     --convert-thumbnails jpg \
     --ppa \"EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf \\\"crop='if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\"\" \
     -o '$MUSIC_DIR/%(artist)s %(album)s %(playlist_index)s - %(title)s.%(ext)s' \
-    '$URL'"
+    '$URL'" --cookies /home/nix/git/monorepo/nix-server/www.youtube.com_cookies.txt
 
 sudo chown -R nix $MUSIC_DIR

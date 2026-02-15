@@ -1,3 +1,4 @@
 hardware-configuration.nix
 .env
 wireguard.conf
+www.youtube.com_cookies.txt
