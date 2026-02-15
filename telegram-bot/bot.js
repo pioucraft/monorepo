@@ -36,13 +36,38 @@ async function sendMessage(apiBase, chatId, text) {
   await fetch(sendUrl);
 }
 
-async function runDownload(url) {
-  const process = Bun.spawn([
+async function runDownloadWithLiveOutput(url, onLine) {
+  const proc = Bun.spawn([
     "sh",
     "/home/nix/git/monorepo/nix-server/download-music.sh",
     url,
+  ], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const decoder = new TextDecoder();
+
+  async function streamLines(stream, sendLine) {
+    let buffer = "";
+    for await (const chunk of stream) {
+      buffer += decoder.decode(chunk);
+      let idx;
+      while ((idx = buffer.indexOf("\n")) !== -1) {
+        const line = buffer.slice(0, idx).trim();
+        buffer = buffer.slice(idx + 1);
+        if (line) await sendLine(line);
+      }
+    }
+    if (buffer.trim()) await sendLine(buffer.trim());
+  }
+
+  // Start streaming both stdout and stderr
+  await Promise.all([
+    streamLines(proc.stdout, onLine),
+    streamLines(proc.stderr, line => onLine(`[stderr] ${line}`)),
   ]);
-  const exitCode = await process.exited;
+
+  const exitCode = await proc.exited;
   return exitCode === 0;
 }
 
@@ -98,13 +123,25 @@ async function main() {
             continue;
           }
 
-          await sendMessage(apiBase, message.chat.id, "Starting download...");
-          const success = await runDownload(url);
-          await sendMessage(
-            apiBase,
-            message.chat.id,
-            success ? "Download complete." : "Download failed."
-          );
+           await sendMessage(apiBase, message.chat.id, "Starting download...");
+           // Capture and send output lines as Telegram messages
+           let lineBuffer = [];
+           const flushLines = async () => {
+             if (lineBuffer.length === 0) return;
+             const msg = lineBuffer.join("\n");
+             await sendMessage(apiBase, message.chat.id, msg);
+             lineBuffer = [];
+           };
+           const success = await runDownloadWithLiveOutput(url, async (line) => {
+             lineBuffer.push(line);
+             if (lineBuffer.length >= 8) await flushLines();
+           });
+           await flushLines();
+           await sendMessage(
+             apiBase,
+             message.chat.id,
+             success ? "Download complete." : "Download failed."
+           );
         }
       }
     } catch (error) {
