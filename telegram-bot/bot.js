@@ -86,11 +86,15 @@ async function main() {
           continue;
         }
 
-        const downloadMatch = text.match(/^\/download(?:@\w+)?\s+(.+)$/i);
+        const downloadMatch = text.match(/^\/(ytdownload|musicdownload)(?:@\w+)?\s+(.+)$/i);
         if (downloadMatch) {
-          const url = downloadMatch[1].trim();
+          const url = downloadMatch[2].trim();
           if (!url) {
-            await sendMessage(apiBase, message.chat.id, "Usage: /download <url>");
+            await sendMessage(
+              apiBase,
+              message.chat.id,
+              "Usage: /ytdownload <url>"
+            );
             continue;
           }
 
