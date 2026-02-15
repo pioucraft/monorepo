@@ -259,7 +259,7 @@ system.stateVersion = "25.05";
       users = [ "nix" ];
       commands = [
         {
-          command = "/home/nathangasser/git/monorepo/nix-server/download-music.sh";
+          command = "/home/nix/git/monorepo/nix-server/download-music.sh";
           options = [ "NOPASSWD" ];
         }
       ];
