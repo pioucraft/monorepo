@@ -36,18 +36,6 @@ in
         extraGroups = [ "networkmanager" "wheel" ];
     };
 
-    security.sudo.extraRules = [
-      {
-        users = [ "nix" ];
-        commands = [
-          {
-            command = "/run/current-system/sw/bin/nixos-container";
-            options = [ "NOPASSWD" "SETENV" ];
-          }
-        ];
-      }
-    ];
-
     home-manager.users.nix = { pkgs, ... }: {
         imports = [
             nixvim.homeModules.nixvim
