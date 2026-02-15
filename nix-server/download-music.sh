@@ -28,9 +28,8 @@ if ! command -v eyeD3 >/dev/null 2>&1; then
 fi
 
 for mp3 in "$MUSIC_DIR"/*.mp3; do
-    [ -e "$mp3" ] || continue  # skip if no files
-
-    echo "Tagging $mp3: blanking ARTIST tag."
-    eyeD3 --artist "" "$mp3"
+  [ -e "$mp3" ] || continue
+  echo "Tagging $mp3: blanking ARTIST tag."
+  eyeD3 --v2 --artist="" "$mp3"
 done
 
