@@ -140,7 +140,7 @@ in
         awscli2
         gnutar
         curl
-        eyeD3
+        eyed3
     ];
 
     # Journal app
@@ -278,7 +278,7 @@ system.stateVersion = "25.05";
             wireguard-tools
             curl
             yt-dlp
-            eyeD3
+            eyed3
         ];
 
             # Enable systemd-resolved so wg-quick can set DNS
