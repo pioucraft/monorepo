@@ -250,7 +250,20 @@ in
         };
         
         config = { config, pkgs, ... }: {
-            system.stateVersion = "25.05";
+system.stateVersion = "25.05";
+
+  # Allow user 'nix' to run the download-music script as root without a password.
+  security.sudo.extraRules = [
+    {
+      users = [ "nix" ];
+      commands = [
+        {
+          command = "/home/nathangasser/git/monorepo/nix-server/download-music.sh";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
             # Grant group containers access to ns paths so host user can nsenter
 

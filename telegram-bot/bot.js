@@ -38,8 +38,8 @@ async function sendMessage(apiBase, chatId, text) {
 
 async function runDownloadWithLiveOutput(url, onLine) {
   const proc = Bun.spawn([
-    "sh",
-    "/home/nix/git/monorepo/nix-server/download-music.sh",
+    "sudo",
+    "./download-music.sh",
     url,
   ], {
     stdout: "pipe",
