@@ -133,11 +133,27 @@ async function main() {
           }
 
            await sendMessage(apiBase, message.chat.id, "Starting download...");
-           // Run download, but do not forward output to Telegram
+
+           // Stream CLI output to Telegram chat incrementally
+           let outputBuffer = [];
+           let flushTimer = null;
+           const flushBuffer = async () => {
+             if (outputBuffer.length > 0) {
+               await sendMessage(apiBase, message.chat.id, outputBuffer.join('\n').slice(0, 4000));
+               outputBuffer = [];
+             }
+             flushTimer = null;
+           };
            const success = await runDownloadWithLiveOutput(url, async (line) => {
-             // Optionally log output locally...
-             console.log(line);
+             outputBuffer.push(line);
+             if (!flushTimer) {
+               flushTimer = setTimeout(flushBuffer, 1250);
+             }
+             if (outputBuffer.length > 6) {
+               await flushBuffer();
+             }
            });
+           await flushBuffer();
            await sendMessage(
              apiBase,
              message.chat.id,
