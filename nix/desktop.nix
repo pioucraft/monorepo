@@ -31,6 +31,14 @@
             UserspaceHID = "true";
         };
     };
+    services.udev.extraRules = ''
+    # Sony DualSense (USB)
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0660", TAG+="uaccess"
+
+    # Sony DualSense (Bluetooth)
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", KERNELS=="0005:054C:0CE6.*", MODE="0660", TAG+="uaccess"
+    '';
+
 
     programs.virt-manager.enable = true;
 
