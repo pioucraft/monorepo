@@ -1,31 +1,4 @@
 <script lang="ts">
-	let syncLoading = $state(false);
-	let syncError = $state('');
-	let syncSuccess = $state(false);
-
-	async function syncMusic() {
-		syncLoading = true;
-		syncError = '';
-		syncSuccess = false;
-		try {
-			const res = await fetch('/api/sync-music', {
-				method: 'GET',
-				headers: {
-					Authorization: auth.hashedPassword ?? '',
-				},
-			});
-			if (!res.ok) {
-				const data = await res.json();
-				syncError = data?.error || 'Sync failed.';
-			} else {
-				syncSuccess = true;
-			}
-		} catch (e) {
-			syncError = 'Sync failed.';
-		} finally {
-			syncLoading = false;
-		}
-	}
 	import {
 		journal,
 		latest,
@@ -261,19 +234,6 @@
 		<div class="mb-6 flex items-center justify-between">
 			<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
 			<div class="flex items-center gap-4">
-			<button
-				onclick={syncMusic}
-				class="cursor-pointer border border-black px-3 py-1 text-xs font-medium text-black dark:border-white dark:text-white"
-				disabled={syncLoading}
-			>
-				{syncLoading ? 'Syncing...' : 'Sync Music Albums'}
-			</button>
-			{#if syncSuccess}
-				<span class="text-green-500 text-xs ml-2">Music synced successfully</span>
-			{/if}
-			{#if syncError}
-				<span class="text-red-500 text-xs ml-2">{syncError}</span>
-			{/if}
 				<button
 					onclick={() => {
 						if (!showHidden) {
