@@ -43,10 +43,11 @@ pkgs.stdenv.mkDerivation {
     bun node_modules/.bin/vite build
   '';
 
-  installPhase = ''
-    mkdir -p $out/bin $out/share/${name}
-    cp -r build/* $out/share/${name}/
-    makeWrapper ${bun}/bin/bun $out/bin/${name} \
-      --add-flags "$out/share/${name}/index.js"
-  '';
+   installPhase = ''
+     mkdir -p $out/bin $out/share/${name}
+     cp -r build/* $out/share/${name}/
+     cp -r node_modules $out/share/${name}/
+     makeWrapper ${bun}/bin/bun $out/bin/${name} \
+       --add-flags "$out/share/${name}/index.js"
+   '';
 }

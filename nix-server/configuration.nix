@@ -153,7 +153,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
             ExecStart = "${server-software}/bin/server-software";
-            WorkingDirectory = "/home/nix/git/monorepo/server-software";
+            WorkingDirectory = "${server-software}/share/server-software";
             EnvironmentFile = "/home/nix/git/monorepo/server-software/.env";
             Restart = "always";
             User = "nix";
