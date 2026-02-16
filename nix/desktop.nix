@@ -20,8 +20,17 @@
 
     virtualisation.libvirtd.enable = true;
 
-    boot.kernelModules = [ "kvm-intel" "kvm" ];
-    boot.initrd.kernelModules = [ "hid-playstation" ];
+    boot.kernelModules = [ "hid-playstation" "kvm-intel" "kvm" ];
+
+    hardware.bluetooth = {
+        enable = true;
+        powerOnBoot = true;
+
+        # Writes /etc/bluetooth/input.conf
+        input.General = {
+            UserspaceHID = "true";
+        };
+    };
 
     programs.virt-manager.enable = true;
 
