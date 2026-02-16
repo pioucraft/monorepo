@@ -337,7 +337,16 @@ services.resolved.enable = true;
         enable = true;
         openFirewall = true; # open default ports (8096, etc)
     };
+
+    systemd.tmpfiles.rules = [
+      "d /var/lib/jellyfin/media/music 0755 jellyfin jellyfin"
+    ];
     
+    fileSystems."/var/lib/jellyfin/media/music" = {
+      device = "/home/nix/git/monorepo/data/music";
+      options = [ "bind" "ro" ]; # remove "ro" if you want write access
+      neededForBoot = false;
+    };
 
 
 
