@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "bun bot.js"
+    "start": "node bot.js"
   }
 }

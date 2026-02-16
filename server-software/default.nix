@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {} }:
 
 let
-  bun = pkgs.bun;
+  nodejs = pkgs.nodejs_20;
   name = "server-software";
   src = builtins.path {
     path = ./.;
@@ -17,10 +17,10 @@ let
   node_modules = pkgs.stdenv.mkDerivation {
     name = "server-software-node_modules";
     inherit src;
-    nativeBuildInputs = [ bun ];
+    nativeBuildInputs = [ nodejs pkgs.makeWrapper ];
     buildPhase = ''
       export HOME=$(mktemp -d)
-      bun install --frozen-lockfile --ignore-scripts
+      npm install --ignore-scripts
     '';
     installPhase = ''
       cp -r node_modules $out
@@ -33,20 +33,21 @@ in
 pkgs.stdenv.mkDerivation {
   inherit name src;
 
-  nativeBuildInputs = [ bun pkgs.makeWrapper ];
+  nativeBuildInputs = [ nodejs pkgs.makeWrapper ];
 
   buildPhase = ''
     export HOME=$(mktemp -d)
     cp -r ${node_modules} node_modules
     chmod -R u+w node_modules
-    bun node_modules/.bin/svelte-kit sync
-    bun node_modules/.bin/vite build
+    node node_modules/.bin/svelte-kit sync
+    node node_modules/.bin/vite build
   '';
 
   installPhase = ''
     mkdir -p $out/bin $out/share/${name}
     cp -r build/* $out/share/${name}/
-    makeWrapper ${bun}/bin/bun $out/bin/${name} \
+    cp -r node_modules $out/share/${name}/
+    makeWrapper ${nodejs}/bin/node $out/bin/${name} \
       --add-flags "$out/share/${name}/index.js"
   '';
 }

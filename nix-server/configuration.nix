@@ -166,7 +166,7 @@ in
         after = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
-            ExecStart = "${pkgs.bun}/bin/bun ${telegramBotSrc}/bot.js";
+            ExecStart = "${pkgs.nodejs_20}/bin/node ${telegramBotSrc}/bot.js";
             WorkingDirectory = "${telegramBotSrc}";
             EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
             Restart = "always";

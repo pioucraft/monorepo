@@ -17,12 +17,13 @@ function parseEnvFile(contents) {
 }
 
 async function loadEnv() {
-  const file = Bun.file(ENV_PATH);
-  if (!(await file.exists())) {
+  const fs = await import('fs/promises');
+  try {
+    const contents = await fs.readFile(ENV_PATH, 'utf8');
+    return parseEnvFile(contents);
+  } catch (err) {
     return {};
   }
-  const contents = await file.text();
-  return parseEnvFile(contents);
 }
 
 function sleep(ms) {
@@ -37,14 +38,12 @@ async function sendMessage(apiBase, chatId, text) {
 }
 
 async function runDownloadWithLiveOutput(url, onLine) {
-  const proc = Bun.spawn([
-    "sh",
+  const { spawn } = await import('child_process');
+  const proc = spawn("sh", [
     "/home/nix/git/monorepo/nix-server/download-music.sh",
     url,
-  ], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+  ]);
+
   const decoder = new TextDecoder();
 
   async function streamLines(stream, sendLine) {
@@ -66,8 +65,9 @@ async function runDownloadWithLiveOutput(url, onLine) {
     streamLines(proc.stderr, line => onLine(`[stderr] ${line}`)),
   ]);
 
-  const exitCode = await proc.exited;
-  return exitCode === 0;
+  return new Promise((resolve) => {
+    proc.on('close', (code) => resolve(code === 0));
+  });
 }
 
 async function main() {
