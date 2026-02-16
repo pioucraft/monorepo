@@ -338,10 +338,7 @@ services.resolved.enable = true;
         openFirewall = true; # open default ports (8096, etc)
     };
     
-    users.users.jellyfin.extraGroups = [ "nix" ];
-    systemd.tmpfiles.rules = [
-      "Z /home/nix/git/monorepo/data/music 0750 nix nix"
-    ];
+
 
 
     boot.kernel.sysctl."net.ipv4.ip_forward" = true;
