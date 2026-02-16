@@ -21,6 +21,7 @@
     virtualisation.libvirtd.enable = true;
 
     boot.kernelModules = [ "kvm-intel" "kvm" ];
+    boot.initrd.kernelModules = [ "hid-playstation" ];
 
     programs.virt-manager.enable = true;
 
