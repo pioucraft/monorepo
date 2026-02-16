@@ -187,7 +187,33 @@
 		);
 	}
 
-	onMount(loadEntries);
+	onMount(() => {
+	loadEntries();
+	fetchMusicDb();
+});
+
+let albums: Record<string, string> = {};
+let albumsLoading = false;
+let albumsError = '';
+
+async function fetchMusicDb() {
+	albumsLoading = true;
+	albumsError = '';
+	try {
+		const res = await fetch('/api/music-db', {
+			headers: {
+				Authorization: auth.hashedPassword ?? ''
+			}
+		});
+		if (res.status === 401) throw new Error('Unauthorized: Wrong password or not provided');
+		if (!res.ok) throw new Error('Failed to fetch');
+		albums = await res.json();
+	} catch (e: any) {
+		albumsError = e?.message || 'Failed to fetch albums';
+	} finally {
+		albumsLoading = false;
+	}
+}
 </script>
 
 {#if showHiddenPasswordPrompt}
@@ -252,6 +278,28 @@
 {/if}
 <div class="min-h-screen bg-white p-8 dark:bg-black">
 	<div class="mx-auto max-w-lg">
+
+<!-- Music Albums Section -->
+<div class="mb-8 bg-neutral-50 dark:bg-zinc-900 border border-neutral-200 dark:border-neutral-700 rounded p-4">
+	<h2 class="text-lg font-bold mb-2 text-black dark:text-white">Music Albums</h2>
+	{#if albumsLoading}
+		<p class="text-neutral-500 text-sm">Loading albums...</p>
+	{:else if albumsError}
+		<p class="text-red-500 text-sm">{albumsError}</p>
+	{:else if Object.keys(albums).length === 0}
+		<p class="text-neutral-500 text-sm">No albums found.</p>
+	{:else}
+		<ul class="space-y-1">
+			{#each Object.entries(albums) as [filename, albumName]}
+				<li class="border-b border-neutral-100 dark:border-neutral-800 pb-1 mb-1 last:mb-0 last:pb-0 last:border-none">
+					<span class="font-semibold text-black dark:text-white">{filename}</span>
+					<span class="text-neutral-500"> – Album: {albumName}</span>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</div>
+
 		<div class="mb-6 flex items-center justify-between">
 			<h1 class="text-xl font-bold text-black dark:text-white">Journal</h1>
 			<div class="flex items-center gap-4">
