@@ -11,7 +11,7 @@
 			const res = await fetch('/api/sync-music', {
 				method: 'GET',
 				headers: {
-					Authorization: auth.password ?? '',
+					Authorization: auth.hashedPassword ?? '',
 				},
 			});
 			if (!res.ok) {
