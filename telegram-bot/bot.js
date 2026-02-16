@@ -60,10 +60,11 @@ async function runDownloadWithLiveOutput(url, onLine) {
     if (buffer.trim()) await sendLine(buffer.trim());
   }
 
-  // Start streaming both stdout and stderr
-  await Promise.all([
-    streamLines(proc.stderr, line => onLine(`[stderr] ${line}`)),
-  ]);
+   // Start streaming both stdout and stderr
+   await Promise.all([
+     streamLines(proc.stdout, line => onLine(line)),
+     streamLines(proc.stderr, line => onLine(`[stderr] ${line}`)),
+   ]);
 
   return new Promise((resolve) => {
     proc.on('close', (code) => resolve(code === 0));
