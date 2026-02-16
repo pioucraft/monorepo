@@ -442,6 +442,7 @@ in
         opencode
         uv
         mullvad-vpn
+        nodejs
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
