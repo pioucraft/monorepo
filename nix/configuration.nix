@@ -443,6 +443,7 @@ in
         uv
         mullvad-vpn
         nodejs
+        prismlauncher
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
