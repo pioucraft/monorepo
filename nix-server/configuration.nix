@@ -317,7 +317,7 @@ services.resolved.enable = true;
         };
     };
 
-    # Caddy reverse proxy
+    # Caddy reverse proxy(s), including Jellyfin
     services.caddy = {
         enable = true;
         virtualHosts."home.gougoule.ch" = {
@@ -325,6 +325,17 @@ services.resolved.enable = true;
                 reverse_proxy localhost:3000
             '';
         };
+        virtualHosts."jellyfin.gougoule.ch" = {
+            extraConfig = ''
+                reverse_proxy 127.0.0.1:8096
+            '';
+        };
+    };
+
+    # Enable the Jellyfin Media Server (reverse proxied via Caddy)
+    services.jellyfin = {
+        enable = true;
+        openFirewall = true; # open default ports (8096, etc)
     };
 
     boot.kernel.sysctl."net.ipv4.ip_forward" = true;
