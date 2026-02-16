@@ -21,9 +21,3 @@ nixos-container run wireguard -- /bin/sh -c "yt-dlp -x --audio-format mp3 --audi
     '$URL'"
 chown -R nix $MUSIC_DIR
 
-# Post-process MP3s: Set consistent Album Artist tag for Navidrome
-if ! command -v eyeD3 >/dev/null 2>&1; then
-    echo "Error: eyeD3 is required for metadata tagging! Please install it (e.g., via Nix or pip)."
-    exit 2
-fi
-
