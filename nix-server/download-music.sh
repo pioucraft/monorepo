@@ -17,7 +17,7 @@ nixos-container run wireguard -- /bin/sh -c "yt-dlp -x --audio-format mp3 --audi
     --convert-thumbnails jpg \
     --ppa \"EmbedThumbnail+ffmpeg_o:-c:v mjpeg -vf \\\"crop='if(gt(ih,iw),iw,ih)':'if(gt(iw,ih),ih,iw)'\\\"\" \
     --cookies /home/nix/git/monorepo/nix-server/www.youtube.com_cookies.txt \
-    -o '$MUSIC_DIR/%(artist)s %(album)s %(playlist_index)s - %(title)s.%(ext)s' \
+    -o '$MUSIC_DIR/%(album)s/%(artist)s %(album)s %(playlist_index)s - %(title)s.%(ext)s' \
     '$URL'"
 chown -R nix $MUSIC_DIR
 
