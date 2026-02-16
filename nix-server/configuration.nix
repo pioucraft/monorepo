@@ -340,7 +340,7 @@ services.resolved.enable = true;
     
     users.users.jellyfin.extraGroups = [ "nix" ];
     systemd.tmpfiles.rules = [
-      "d /home/nix/git/monorepo/data/music 0750 nix nix"
+      "Z /home/nix/git/monorepo/data/music 0750 nix nix"
     ];
 
 
