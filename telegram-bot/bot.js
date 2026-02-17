@@ -37,7 +37,7 @@ async function sendMessage(apiBase, chatId, text) {
   await fetch(sendUrl);
 }
 
-async function runDownloadWithLiveOutput(url, onLine) {
+async function runDownloadWithLiveOutput(url, onLine, timeoutMs = 5 * 60 * 1000) {
   const { spawn } = await import('child_process');
   const proc = spawn("sh", [
     "/home/nix/git/monorepo/nix-server/download-music.sh",
@@ -48,26 +48,63 @@ async function runDownloadWithLiveOutput(url, onLine) {
 
   async function streamLines(stream, sendLine) {
     let buffer = "";
-    for await (const chunk of stream) {
-      buffer += decoder.decode(chunk);
-      let idx;
-      while ((idx = buffer.indexOf("\n")) !== -1) {
-        const line = buffer.slice(0, idx).trim();
-        buffer = buffer.slice(idx + 1);
-        if (line) await sendLine(line);
+    try {
+      for await (const chunk of stream) {
+        buffer += decoder.decode(chunk);
+        let idx;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.slice(0, idx).trim();
+          buffer = buffer.slice(idx + 1);
+          if (line) await sendLine(line);
+        }
       }
+      if (buffer.trim()) await sendLine(buffer.trim());
+    } catch (err) {
+      // stream may error when process is killed; ignore
     }
-    if (buffer.trim()) await sendLine(buffer.trim());
   }
 
-   // Start streaming both stdout and stderr
-   await Promise.all([
-     streamLines(proc.stderr, line => onLine(`[stderr] ${line}`)),
-   ]);
+  // Start streaming stderr (keep behaviour similar to before)
+  const streamsPromise = Promise.all([
+    streamLines(proc.stderr, line => onLine(`[stderr] ${line}`)),
+  ]);
 
-  return new Promise((resolve) => {
-    proc.on('close', (code) => resolve(code === 0));
+  let settled = false;
+  const finishPromise = new Promise((resolve) => {
+    proc.on('close', (code) => {
+      if (!settled) {
+        settled = true;
+        resolve({ success: code === 0, timedOut: false });
+      }
+    });
+    proc.on('error', (err) => {
+      if (!settled) {
+        settled = true;
+        resolve({ success: false, timedOut: false });
+      }
+    });
   });
+
+  const timeoutPromise = new Promise((resolve) => {
+    const id = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        try {
+          proc.kill('SIGTERM');
+        } catch (e) {}
+        // force kill after short grace period
+        setTimeout(() => {
+          try { proc.kill('SIGKILL'); } catch (e) {}
+        }, 5000);
+        resolve({ success: false, timedOut: true });
+      }
+    }, timeoutMs);
+  });
+
+  const result = await Promise.race([finishPromise, timeoutPromise]);
+  // Wait for streams to drain (best-effort)
+  try { await streamsPromise; } catch (e) {}
+  return result;
 }
 
 async function main() {
@@ -144,21 +181,25 @@ async function main() {
              }
              flushTimer = null;
            };
-           const success = await runDownloadWithLiveOutput(url, async (line) => {
-             outputBuffer.push(line);
-             if (!flushTimer) {
-               flushTimer = setTimeout(flushBuffer, 1250);
-             }
-             if (outputBuffer.length > 6) {
-               await flushBuffer();
-             }
-           });
-           await flushBuffer();
-           await sendMessage(
-             apiBase,
-             message.chat.id,
-             success ? "Download complete." : "Download failed."
-           );
+            const result = await runDownloadWithLiveOutput(url, async (line) => {
+              outputBuffer.push(line);
+              if (!flushTimer) {
+                flushTimer = setTimeout(flushBuffer, 1250);
+              }
+              if (outputBuffer.length > 6) {
+                await flushBuffer();
+              }
+            }, 5 * 60 * 1000); // 5 minutes
+            await flushBuffer();
+            if (result.timedOut) {
+              await sendMessage(apiBase, message.chat.id, "timeout");
+            } else {
+              await sendMessage(
+                apiBase,
+                message.chat.id,
+                result.success ? "Download complete." : "Download failed."
+              );
+            }
         }
       }
     } catch (error) {
