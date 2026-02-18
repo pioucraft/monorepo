@@ -35,10 +35,12 @@
     };
     users.users.nix.extraGroups = [ "minecraft" ];
 
-    # Enforce directory perms so group can traverse/read (and optionally write)
     systemd.tmpfiles.rules = [
-        # Make sure the directory exists with the right owner/group/mode
+        # Ensure the top-level dir exists with group access
         "d /var/lib/minecraft 0770 minecraft minecraft -"
+
+        # Recursively enforce ownership + mode on existing contents
+        "Z /var/lib/minecraft 0770 minecraft minecraft -"
     ];
 
 }
