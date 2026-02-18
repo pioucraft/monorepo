@@ -444,6 +444,7 @@ in
         mullvad-vpn
         nodejs
         prismlauncher
+        cava
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
