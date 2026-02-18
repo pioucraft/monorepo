@@ -17,6 +17,7 @@ in
         ./hardware-configuration.nix 
         (import "${home-manager}/nixos")
         nixvim.nixosModules.nixvim
+        ./minecraft.nix
     ];
 
     programs.nixvim.enable = true;
