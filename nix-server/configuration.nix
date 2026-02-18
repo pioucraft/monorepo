@@ -185,7 +185,7 @@ in
         serviceConfig = {
             Type = "oneshot";
             ExecStart = "/home/nix/git/monorepo/nix-server/backup.sh";
-            User = "nix";
+            User = "root";
         };
         unitConfig = {
             OnSuccess = "data-backup-notify-success.service";
