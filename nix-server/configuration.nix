@@ -22,6 +22,7 @@ in
 
     programs.nixvim.enable = true;
     home-manager.extraSpecialArgs = { inherit nixvim; };  # Passes nixvim to user configs
+    nixpkgs.config.allowUnfree = true;
 
     boot.loader.grub.enable = true;
     boot.loader.grub.device = "/dev/sda";
