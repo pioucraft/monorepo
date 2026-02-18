@@ -33,5 +33,6 @@
         fsType = "none";
         options = [ "bind" ];
     };
+    users.users.nix.extraGroups = [ "minecraft" ];
 }
 
