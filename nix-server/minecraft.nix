@@ -33,15 +33,5 @@
         fsType = "none";
         options = [ "bind" ];
     };
-    users.users.nix.extraGroups = [ "minecraft" ];
-
-    systemd.tmpfiles.rules = [
-        # Ensure the top-level dir exists with group access
-        "d /var/lib/minecraft 0770 minecraft minecraft -"
-
-        # Recursively enforce ownership + mode on existing contents
-        "Z /var/lib/minecraft 0770 minecraft minecraft -"
-    ];
-
 }
 
