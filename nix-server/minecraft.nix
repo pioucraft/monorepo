@@ -6,7 +6,7 @@
         eula = true;
 
         # Store world + configs here
-        dataDir = "/home/nix/git/monorepo/data/minecraft";
+        dataDir = "/var/lib/minecraft";
 
         # Make whitelist/ops/etc managed declaratively by NixOS
         declarative = true;
@@ -26,6 +26,12 @@
 
         # Optional: open firewall for the port
         openFirewall = true;
+    };
+
+    fileSystems."/home/nix/git/monorepo/data/minecraft" = {
+        device = "/var/lib/minecraft";
+        fsType = "none";
+        options = [ "bind" ];
     };
 }
 
