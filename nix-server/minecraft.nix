@@ -6,7 +6,7 @@
         eula = true;
 
         # Store world + configs here
-        dataDir = "/home/nix/data/minecraft";
+        dataDir = "/home/nix/git/monorepo/data/minecraft";
 
         # Make whitelist/ops/etc managed declaratively by NixOS
         declarative = true;
