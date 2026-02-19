@@ -138,6 +138,7 @@ in
                 { key = "<leader>f"; action = "<cmd>Telescope find_files<CR>"; options.desc = "Find files"; }
                 { key = "<leader>g"; action = "<cmd>Telescope live_grep<CR>"; options.desc = "Live grep"; }
                 { key = "<leader>e"; action = "<cmd>NvimTreeToggle<CR>"; options.desc = "Toggle file explorer"; }
+                { key = "<leader>d"; action = "<cmd>lua vim.diagnostic.open_float()<CR>"; options.desc = "Show diagnostics"; }
             ];
 
 
