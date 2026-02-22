@@ -447,6 +447,7 @@ in
         prismlauncher
         cava
         python3
+        signal-desktop
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
