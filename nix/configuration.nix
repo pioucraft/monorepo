@@ -86,6 +86,8 @@ in
         extraGroups = [ "networkmanager" "wheel" ];
     };
 
+    security.polkit.enable = true;
+
     home-manager.users.nathangasser = { pkgs, ... }: {
         imports = [
             nixvim.homeModules.nixvim
@@ -336,6 +338,7 @@ in
 
                 exec-once = [
                     "swaybg -i $HOME/git/monorepo/nix/wallpapers/$(ls $HOME/git/monorepo/nix/wallpapers | shuf -n 1)"
+                    "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
                 ];
 
                 misc = {
