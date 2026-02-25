@@ -50,3 +50,26 @@ if ! aws s3 cp "$ARCHIVE_PATH" "s3://$R2_BUCKET_NAME/$TIMESTAMP/$ARCHIVE_NAME" \
 fi
 
 echo "Backup completed successfully: $TIMESTAMP/$ARCHIVE_NAME"
+
+# === Prune old backups, keep only 5 most recent ===
+echo "Pruning old backups (keeping only 5 most recent)..."
+# List all backup prefixes (assume each backup is in its own top-level timestamp dir)
+BACKUPS=$(aws s3api list-objects-v2 --bucket "$R2_BUCKET_NAME" \
+    --endpoint-url "$R2_ENDPOINT" \
+    --delimiter '/' \
+    --query 'CommonPrefixes[].Prefix' \
+    --output text)
+
+# Convert to bash array
+BACKUP_ARRAY=($BACKUPS)
+NUM_BACKUPS=${#BACKUP_ARRAY[@]}
+if [ "$NUM_BACKUPS" -gt 5 ]; then
+    # Sort numerically and keep only the last 5
+    TO_DELETE=$(printf "%s\n" "${BACKUP_ARRAY[@]}" | sort -n | head -n -5)
+    for PREFIX in $TO_DELETE; do
+        echo "Deleting old backup: $PREFIX"
+        aws s3 rm "s3://$R2_BUCKET_NAME/$PREFIX" --recursive --endpoint-url "$R2_ENDPOINT" --region auto
+    done
+else
+    echo "No old backups to prune. ($NUM_BACKUPS <= 5)"
+fi
