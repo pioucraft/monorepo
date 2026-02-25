@@ -448,6 +448,9 @@ in
         cava
         python3
         signal-desktop
+        transmission_4
+        transmission_4-qt
+        mpv
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
