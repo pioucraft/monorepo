@@ -134,6 +134,14 @@
 	// Expose toggleCheckbox globally
 	if (typeof window !== 'undefined') {
 		(window as any).toggleCheckbox = toggleCheckbox;
+		(window as any).showLinkedNoteHistory = (noteId: number, chronological?: boolean) => {
+			const count = journal.entries.length;
+			let idx = noteId;
+			if (chronological && count > 0) {
+				idx = count - 1 - noteId;
+			}
+			historyIndex = idx;
+		};
 	}
 
 	function formatDate(timestamp: number): string {
@@ -431,6 +439,20 @@
 				</button>
 			</div>
 			<div class="space-y-2">
+					<!-- Create note with link button -->
+					<button
+onclick={() => {
+						const count = journal.entries.length;
+						const idx = actionModalIndex === null ? 0 : actionModalIndex;
+						const chronologicalIdx = count - 1 - idx;
+						newEntry = `.(${chronologicalIdx}) `;
+						actionModalIndex = null;
+					}}
+						class="flex w-full cursor-pointer items-center gap-2 border border-green-600 px-3 py-2 text-sm text-green-700 hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-900"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+						Create note with link to this
+					</button>
 				<button
 					onclick={() => {
 						startEditing(actionModalIndex!);

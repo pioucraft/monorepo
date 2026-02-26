@@ -28,6 +28,10 @@ export function parseContent(content: string, entryIndex?: number): string {
 			/(https?:\/\/[^\s]+)/g,
 			'<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">$1</a>'
 		)
+		// Make note links clickable
+		.replace(/\.\/?\((\d+)\)/g, (match, noteId) => {
+			return `<a href="#" onclick=\"window.showLinkedNoteHistory && window.showLinkedNoteHistory(${noteId}, true); return false;\" class="text-green-600 underline">.(${noteId})</a>`;
+		})
 		// Replace newlines
 		.replace(/\n/g, '<br>')
 		// Handle checkboxes
