@@ -339,6 +339,7 @@ in
                 exec-once = [
                     "swaybg -i $HOME/git/monorepo/nix/wallpapers/$(ls $HOME/git/monorepo/nix/wallpapers | shuf -n 1)"
                     "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
+                    "mako"
                 ];
 
                 misc = {
@@ -349,20 +350,25 @@ in
                 "$mod" = "SUPER";
                 "$terminal" = "ghostty";
                 "$browser" = "xdg-open https://";
-                bind = [
-                    "$mod, Return, exec, $terminal"
-                    "$mod, Space, exec, wofi --show drun"
-                    "$mod, B, exec, $browser"
-                    "$mod, Q, killactive"
-                    "$mod, F, togglefloating"
-                    "$mod Control, l, exec, hyprlock"
-                    ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
-                    ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-                    ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-                    ", XF86AudioPlay, exec, playerctl play-pause"
-                    ", XF86AudioPrev, exec, playerctl previous"
-                    ", XF86AudioNext, exec, playerctl next"
-                ]
+        bind = [
+            "$mod, Return, exec, $terminal"
+            "$mod, Space, exec, wofi --show drun"
+            "$mod, B, exec, $browser"
+            "$mod, Q, killactive"
+            "$mod, F, togglefloating"
+            "$mod Control, l, exec, hyprlock"
+            ", XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+            ", XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+            ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+            ", XF86AudioPlay, exec, playerctl play-pause"
+            ", XF86AudioPrev, exec, playerctl previous"
+            ", XF86AudioNext, exec, playerctl next"
+            # --- Screenshot and Screen Recording Hotkeys ---
+            "$mod SHIFT, S, exec, bash $HOME/git/monorepo/scripts/screenshot-region.sh"
+            "$mod SHIFT, F, exec, bash $HOME/git/monorepo/scripts/screenshot-full.sh"
+            "$mod SHIFT, R, exec, bash $HOME/git/monorepo/scripts/start-recording.sh"
+            "$mod SHIFT, X, exec, bash $HOME/git/monorepo/scripts/stop-recording.sh"
+        ]
                 ++ (
                     builtins.concatLists (builtins.genList (i:
                         let ws = i + 1;
@@ -454,6 +460,12 @@ in
         transmission_4
         transmission_4-qt
         mpv
+        grim
+        slurp
+        swappy
+        wf-recorder
+        libnotify
+        mako
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
