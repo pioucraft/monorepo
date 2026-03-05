@@ -17,10 +17,6 @@ export interface JournalEntry {
 export const entries = writable<JournalEntry[]>([]);
 export const loading = writable(true);
 
-export function parseContent(content: string): string {
-	return content.replace(/\n/g, '<br>');
-}
-
 export function latest(entry: JournalEntry): Revision {
 	return entry.history[entry.history.length - 1];
 }

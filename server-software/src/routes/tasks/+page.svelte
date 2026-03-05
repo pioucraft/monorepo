@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { journal, latest, loadEntries } from '$lib/journal.svelte';
+	import { journal, latest, loadEntries, parseContent } from '$lib/journal.svelte';
 	import { onMount } from 'svelte';
 	import ArrowUturnLeft from '$lib/icons/ArrowUturnLeft.svelte';
 
@@ -27,7 +27,7 @@
 						let status: Task['status'] = 'pending';
 						if (statusChar === 'x') status = 'completed';
 						else if (statusChar === '-') status = 'never';
-						const taskContent = trimmed.replace(/^-\s*\[[ x-]\]\s*/i, '');
+						const taskContent = parseContent(trimmed.replace(/^-\s*\[[ x-]\]\s*/i, ''));
 						return {
 							content: taskContent,
 							status,
@@ -114,7 +114,7 @@
 								>
 									<input type="checkbox" disabled />
 									<div class="flex-1">
-										<p class="text-sm text-black dark:text-white">{task.content}</p>
+										<p class="text-sm text-black dark:text-white">{@html task.content}</p>
 										<p class="mt-1 text-xs text-neutral-500">
 											<button
 												type="button"
@@ -144,7 +144,7 @@
 									<input type="checkbox" checked disabled />
 									<div class="flex-1">
 										<p class="text-sm text-black dark:text-white line-through">
-											{task.content}
+											{@html task.content}
 										</p>
 										<p class="mt-1 text-xs text-neutral-500">
 											<button
@@ -175,7 +175,7 @@
 									<span class="text-neutral-400">[-]</span>
 									<div class="flex-1">
 										<p class="text-sm text-neutral-500 line-through">
-											{task.content}
+											{@html task.content}
 										</p>
 										<p class="mt-1 text-xs text-neutral-500">
 											<button
