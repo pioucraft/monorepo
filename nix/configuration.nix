@@ -364,10 +364,10 @@ in
             ", XF86AudioPrev, exec, playerctl previous"
             ", XF86AudioNext, exec, playerctl next"
             # --- Screenshot and Screen Recording Hotkeys ---
-            "$mod SHIFT, S, exec, bash $HOME/git/monorepo/scripts/screenshot-region.sh"
-            "$mod SHIFT, F, exec, bash $HOME/git/monorepo/scripts/screenshot-full.sh"
-            "$mod SHIFT, R, exec, bash $HOME/git/monorepo/scripts/start-recording.sh"
-            "$mod SHIFT, X, exec, bash $HOME/git/monorepo/scripts/stop-recording.sh"
+            "$mod SHIFT, S, exec, bash $HOME/git/monorepo/nix/scripts/screenshot-region.sh"
+            "$mod SHIFT, F, exec, bash $HOME/git/monorepo/nix/scripts/screenshot-full.sh"
+            "$mod SHIFT, R, exec, bash $HOME/git/monorepo/nix/scripts/start-recording.sh"
+            "$mod SHIFT, X, exec, bash $HOME/git/monorepo/nix/scripts/stop-recording.sh"
         ]
                 ++ (
                     builtins.concatLists (builtins.genList (i:
