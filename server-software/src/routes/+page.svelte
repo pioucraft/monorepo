@@ -261,6 +261,15 @@
 					<ChartBar class="h-3.5 w-3.5" />
 					Stats
 				</a>
+				<a
+					href="/tasks"
+					class="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-black dark:hover:text-white"
+				>
+					<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+					</svg>
+					Tasks
+				</a>
 			</div>
 		</div>
 
