@@ -16,6 +16,9 @@
 	import XMark from '$lib/icons/XMark.svelte';
 	import MagnifyingGlass from '$lib/icons/MagnifyingGlass.svelte';
 	import ChartBar from '$lib/icons/ChartBar.svelte';
+	import PlusCircle from '$lib/icons/PlusCircle.svelte';
+	import Eye from '$lib/icons/Eye.svelte';
+	import EyeSlash from '$lib/icons/EyeSlash.svelte';
 
 	let newEntry = $state('');
 	let editingIndex: number | null = $state(null);
@@ -447,7 +450,7 @@ onclick={() => {
 					}}
 						class="flex w-full cursor-pointer items-center gap-2 border border-green-600 px-3 py-2 text-sm text-green-700 hover:bg-green-50 dark:border-green-400 dark:text-green-300 dark:hover:bg-green-900"
 					>
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+						<PlusCircle class="h-4 w-4" />
 						Create note with link to this
 					</button>
 				<button
@@ -483,29 +486,11 @@ onclick={() => {
 					}}
 					class="flex w-full cursor-pointer items-center gap-2 border border-black px-3 py-2 text-sm text-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black"
 				>
-					<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						{#if journal.entries[actionModalIndex!].hidden}
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-							/>
-						{:else}
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-							/>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-							/>
-						{/if}
-					</svg>
+					{#if journal.entries[actionModalIndex!].hidden}
+						<EyeSlash class="h-4 w-4" />
+					{:else}
+						<Eye class="h-4 w-4" />
+					{/if}
 					{journal.entries[actionModalIndex!].hidden ? 'Unhide' : 'Hide'}
 				</button>
 			</div>
