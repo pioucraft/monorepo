@@ -466,6 +466,7 @@ in
         wf-recorder
         libnotify
         mako
+        libreoffice
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
