@@ -135,12 +135,24 @@ in
                     sync_root_with_cwd = true;
                 };
             };
+
+            plugins.harpoon = {
+                enable = true;
+            };
             # keymaps for fuzzy finder + <leader> e for file explorer
             keymaps = [
                 { key = "<leader>f"; action = "<cmd>Telescope find_files<CR>"; options.desc = "Find files"; }
                 { key = "<leader>g"; action = "<cmd>Telescope live_grep<CR>"; options.desc = "Live grep"; }
                 { key = "<leader>e"; action = "<cmd>NvimTreeToggle<CR>"; options.desc = "Toggle file explorer"; }
                 { key = "<leader>d"; action = "<cmd>lua vim.diagnostic.open_float()<CR>"; options.desc = "Show diagnostics"; }
+                # Harpoon
+                { key = "<leader>a"; action = "<cmd>lua require('harpoon'):list():add()<CR>"; options.desc = "Add file to Harpoon"; }
+                { key = "<leader>h"; action = "<cmd>lua require('harpoon').ui:toggle_quick_menu(require('harpoon'):list())<CR>"; options.desc = "Toggle Harpoon menu"; }
+                { key = "<leader>1"; action = "<cmd>lua require('harpoon'):list():select(1)<CR>"; options.desc = "Go to Harpoon file 1"; }
+                { key = "<leader>2"; action = "<cmd>lua require('harpoon'):list():select(2)<CR>"; options.desc = "Go to Harpoon file 2"; }
+                { key = "<leader>3"; action = "<cmd>lua require('harpoon'):list():select(3)<CR>"; options.desc = "Go to Harpoon file 3"; }
+                { key = "<leader>4"; action = "<cmd>lua require('harpoon'):list():select(4)<CR>"; options.desc = "Go to Harpoon file 4"; }
+
             ];
 
 
