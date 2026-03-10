@@ -166,7 +166,7 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
             ExecStart = "${telegram-bot}/bin/server-software";
-            WorkingDirectory = "${telegram-bot}";
+            WorkingDirectory = "/home/nix/git/monorepo/telegram-bot";
             EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
             Restart = "always";
             User = "nix";
