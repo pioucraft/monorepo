@@ -7,10 +7,7 @@ let
       ref = "nixos-25.11";
   });
   server-software = import ../server-software { inherit pkgs; };
-  telegramBotSrc = builtins.path {
-    path = ../telegram-bot;
-    name = "telegram-bot-src";
-  };
+  telegram-bot = import ../telegram-bot { inherit pkgs; };
 in
 {
     imports = [
@@ -168,13 +165,11 @@ in
         after = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
         serviceConfig = {
-            ExecStart = "${pkgs.nodejs_20}/bin/node ${telegramBotSrc}/bot.js";
-            WorkingDirectory = "${telegramBotSrc}";
+            ExecStart = "${telegram-bot}/bin/server-software";
+            WorkingDirectory = "${telegram-bot}";
             EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
             Restart = "always";
-            User = "root";
-            Environment = "PATH=/run/current-system/sw/bin:/bin:/usr/bin:/usr/local/bin";
-
+            User = "nix";
         };
     };
 
