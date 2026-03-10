@@ -191,6 +191,7 @@ in
                     clangd.enable = true;
                     svelte.enable = true;
                     tailwindcss.enable = true;
+                    ts_ls.enable = true;
                 };
             };
 
