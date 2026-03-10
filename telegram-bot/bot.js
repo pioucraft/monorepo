@@ -1,31 +1,3 @@
-const ENV_PATH = new URL("../nix-server/.env", import.meta.url).pathname;
-
-function parseEnvFile(contents) {
-    const env = {};
-    for (const line of contents.split("\n")) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) {
-            continue;
-        }
-        const [key, ...rest] = trimmed.split("=");
-        if (!key) {
-            continue;
-        }
-        env[key] = rest.join("=").trim();
-    }
-    return env;
-}
-
-async function loadEnv() {
-    const fs = await import('fs/promises');
-    try {
-        const contents = await fs.readFile(ENV_PATH, 'utf8');
-        return parseEnvFile(contents);
-    } catch (err) {
-        return {};
-    }
-}
-
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -38,9 +10,8 @@ async function sendMessage(apiBase, chatId, text) {
 }
 
 async function main() {
-    const fileEnv = await loadEnv();
-    const token = process.env.TELEGRAM_BOT_TOKEN || fileEnv.TELEGRAM_BOT_TOKEN;
-    const allowedChatId = process.env.TELEGRAM_CHAT_ID || fileEnv.TELEGRAM_CHAT_ID;
+    const token = process.env.TELEGRAM_BOT_TOKEN
+    const allowedChatId = process.env.TELEGRAM_CHAT_ID
 
     if (!token) {
         throw new Error("Missing TELEGRAM_BOT_TOKEN in nix-server/.env");
