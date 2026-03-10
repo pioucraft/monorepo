@@ -7,7 +7,6 @@ let
       ref = "nixos-25.11";
   });
   server-software = import ../server-software { inherit pkgs; };
-  telegram-bot = import ../telegram-bot { inherit pkgs; };
 in
 {
     imports = [
@@ -154,20 +153,6 @@ in
             ExecStart = "${server-software}/bin/server-software";
             WorkingDirectory = "/home/nix/git/monorepo/server-software";
             EnvironmentFile = "/home/nix/git/monorepo/server-software/.env";
-            Restart = "always";
-            User = "nix";
-        };
-    };
-
-    # Telegram bot
-    systemd.services.telegram-bot = {
-        description = "Telegram Bot";
-        after = [ "network.target" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-            ExecStart = "${telegram-bot}/bin/server-software";
-            WorkingDirectory = "/home/nix/git/monorepo/telegram-bot";
-            EnvironmentFile = "/home/nix/git/monorepo/nix-server/.env";
             Restart = "always";
             User = "nix";
         };
