@@ -27,6 +27,7 @@ const telegramApiBase = `https://api.telegram.org/bot${telegramToken}`;
 
 let isBusy = false;
 
+
 async function telegramRequest<T>(method: string, payload: Record<string, unknown>): Promise<T> {
   const response = await fetch(`${telegramApiBase}/${method}`, {
     method: "POST",
@@ -67,7 +68,7 @@ async function streamResponseToTelegram(chatId: number, prompt: string) {
     });
 
     const stream = openai.responses.stream({
-      model: "gpt-5",
+      model: "gpt-5-mini",
       input,
       tools: [{ type: "web_search" }],
     });
@@ -76,7 +77,7 @@ async function streamResponseToTelegram(chatId: number, prompt: string) {
       if (event.type === "response.output_text.delta") {
         accumulatedText += event.delta ?? "";
         const now = Date.now();
-        if (now - lastUpdateAt > 800 && accumulatedText !== lastSentText) {
+        if (now - lastUpdateAt > 300 && accumulatedText !== lastSentText) {
           await telegramRequest("editMessageText", {
             chat_id: chatId,
             message_id: message.message_id,
@@ -93,6 +94,7 @@ async function streamResponseToTelegram(chatId: number, prompt: string) {
         chat_id: chatId,
         message_id: message.message_id,
         text: accumulatedText,
+        parse_mode: "Markdown",
       });
     }
 
