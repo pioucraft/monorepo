@@ -480,6 +480,7 @@ in
         libnotify
         mako
         libreoffice
+        ngrok
     ];
 
     system.stateVersion = "25.11"; # Did you read the comment?
