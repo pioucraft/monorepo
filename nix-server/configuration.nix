@@ -163,6 +163,7 @@ in
         after = [ "network.target" ];
         wantedBy = [ "multi-user.target" ];
         restartIfChanged = true;
+        path = with pkgs; [ bun ];
         serviceConfig = {
             ExecStart = "/home/nix/git/monorepo/telegram-bot/run.sh";
             WorkingDirectory = "/home/nix/git/monorepo/telegram-bot";
