@@ -158,6 +158,19 @@ in
         };
     };
 
+    systemd.services.telegram-bot = {
+        description = "Telegram Bot";
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+        restartIfChanged = true;
+        serviceConfig = {
+            ExecStart = "/home/nix/git/monorepo/telegram-bot/run.sh";
+            WorkingDirectory = "/home/nix/git/monorepo/telegram-bot";
+            Restart = "always";
+            User = "nix";
+        };
+    };
+
     # Data backup to Cloudflare R2
     systemd.services.data-backup = {
         description = "Backup data to Cloudflare R2";
